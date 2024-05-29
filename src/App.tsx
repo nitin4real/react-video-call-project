@@ -1,7 +1,7 @@
 import { useId, useState } from 'react';
 import './App.css';
 import { initWithUserNameAndToken, sendMessage, setUpProject } from "./project/project";
-
+import { GenerateTokenForUserID } from './AgoraTokenGenerator';
 // const Client = ({ children }:any) => {
 //   return (
 //     <AgoraRTCProvider client={AgoraRTC.createClient({ mode: "rtc", codec: "vp8" }) as any}>
@@ -68,48 +68,17 @@ function App() {
   const loginSucces = (status: boolean) => {
     setIsLoading(status)
   }
-
-  // return <LoginComponent />
+  if (isLoading) {
+    return <LoginComponent onLogin={loginSucces} />
+  }
   return (
     <>
-      <LoginButton loginSucces={loginSucces} />
       {isLoading ? <></> : <ChatScreen />}
     </>
   );
 }
 
 export default App;
-
-const LoginButton = ({ loginSucces }: { loginSucces: (status: boolean) => void }) => {
-  const loginUser1 = () => {
-    loginSucces(true)
-    initWithUserNameAndToken(
-      'loginUser1',
-      '007eJxSYBA+6L5Ko9zrvdm2l0ftV7VX7HS3KZW7+Sf0bfrNnXbcDEoKDGaJBikGSYZGaWYG5iaJiSkWhhbJlpZpaZbGpqYpJiYm0s/D0gTUGRg42VyZmBgYGUAYxGcBkzwMuYmZeckZiSVF+fm5XAw5+emZeaHFqUWGIHUQlciigAAAAP//LdooMQ==',
-      loginSucces)
-  }
-  const loginUser2 = () => {
-    loginSucces(true)
-    initWithUserNameAndToken(
-      'loginUser2',
-      '007eJxSYKh1i14n2ip/LusAm+jyavMrWz7rHzp6dsXkn6d3XY1/4FijwGCWaJBikGRolGZmYG6SmJhiYWiRbGmZlmZpbGqaYmJiovk8LE1AnYHhwCQjBiYGRjAG8VnAJA9DbmJmXnJGYklRfn4uF0NOfnpmXmhxapERSB1EJbIoIAAA//9nXCt/',
-      loginSucces)
-  }
-  const loginUser3 = () => {
-    loginSucces(true)
-    initWithUserNameAndToken(
-      'loginUser3',
-      '007eJxSYFB38dpxQLRoyvULy6c4vs/2KTTh1RX66mARp5a8dLGNsoMCg1miQYpBkqFRmpmBuUliYoqFoUWypWVamqWxqWmKiYmJ6fOwNAF1BoaPdu8ZmRgYGUAYxGcBkzwMuYmZeckZiSVF+fm5XAw5+emZeaHFqUXGIHUQlciigAAAAP//oown7A==',
-      loginSucces)
-  }
-
-  return <>
-    <div onClick={loginUser1}>login as user1</div>
-    <div onClick={loginUser2}>login as user2</div>
-    <div onClick={loginUser3}>login as user3</div>
-  </>
-}
-
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -170,12 +139,7 @@ const avatars = [
 ];
 
 
-
-
-
-
-
-const LoginComponent: React.FC = () => {
+const LoginComponent = ({ onLogin }: { onLogin: (status: boolean) => void }) => {
   const [username, setUsername] = useState<string>('');
   const [selectedAvatarIndex, setSelectedAvatar] = useState<number>(-1);
 
@@ -187,11 +151,19 @@ const LoginComponent: React.FC = () => {
     setSelectedAvatar(avatar);
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (username && selectedAvatarIndex) {
       console.log('Username:', username);
       console.log('Selected Avatar:', avatars[selectedAvatarIndex]);
+      //
+      const { tokens = {}, appId = '' } = await GenerateTokenForUserID(username)
       // Implement your login function here
+      const { rtcToken = '', rtmToken = '' } = tokens
+      if (!rtcToken || !rtmToken) {
+        alert('Some Problem Occured while login')
+        return
+      }
+      initWithUserNameAndToken(username, tokens, appId, onLogin)
     } else {
       alert('Please enter a username and select an avatar.');
     }
