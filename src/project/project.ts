@@ -42,29 +42,18 @@ const AgoraRTCManager = async (eventsCallback: any) => {
 };
 
 const setUpVideo = async (uid: string, token: string, appId: string) => {
-  let channelParameters = {
-    // A variable to hold a local audio track.
-    localAudioTrack: null,
-    // A variable to hold a local video track.
-    localVideoTrack: null,
-    // A variable to hold a remote audio track.
-    remoteAudioTrack: null,
-    // A variable to hold a remote video track.
-    remoteVideoTrack: null,
-    // A variable to hold the remote user id.s
-    remoteUid: null,
-  };
+
   const client = AgoraRTC.createClient({
     codec: 'h264',
-    mode: 'live'
+    mode: 'live',
+    role: 'host'
   })
 
-  client.setClientRole('host')
+  // client.setClientRole('host')
 
   client.on('user-joined', (user: IAgoraRTCRemoteUser) => {
     console.log(user)
   })
-
 
   await join(client, {
     appId,
@@ -93,24 +82,17 @@ const setUpVideo = async (uid: string, token: string, appId: string) => {
     console.log(user.uid + "has left the channel");
   });
 
-
-  console.log('---setting up video', token, uid, appId)
-}
-
-const join = async (agoraEngine: IAgoraRTCClient, config: any) => {
-
-  videoElement.setAttribute('width', '320');
-  videoElement.setAttribute('height', '180');
-
-  let channelParameters: any
-
-  try {
-    await agoraEngine.join(
-      config.appId,
-      config.channelName,
-      config.token,
-      config.uid
-    );
+  // const t = client.remoteUsers
+  try{
+    videoElement.setAttribute('width', '320');
+    videoElement.setAttribute('height', '180');
+    const videoArray = [videoElement]
+    videoArray.forEach((elemnt) => {
+      videoGorup.append(elemnt);
+    })
+    
+    let channelParameters: any
+  
     channelParameters = {
       localAudioTrack: await AgoraRTC.createMicrophoneAudioTrack(),
       localVideoTrack: 
@@ -118,32 +100,36 @@ const join = async (agoraEngine: IAgoraRTCClient, config: any) => {
       // await AgoraRTC.createScreenVideoTrack({ displaySurface: 'window' }, 'enable')
     }
 
-    await agoraEngine.publish([
+    await client.publish([
       channelParameters.localAudioTrack,
       channelParameters.localVideoTrack,
     ]);
+  
+    if (channelParameters) {
+      channelParameters.localVideoTrack.play(videoElement);
+    }
+  } catch(e){
+    console.log('---error in setting up self video audio share',e)
+
+  }
+
+  console.log('---setting up video', token, uid, appId)
+}
+
+const join = async (agoraEngine: IAgoraRTCClient, config: any) => {
+  try {
+    await agoraEngine.join(
+      config.appId,
+      config.channelName,
+      config.token,
+      config.uid
+    );
+
   } catch (e) {
     console.log('error ---', e)
   }
-  // Create a local audio track from the audio sampled by a microphone.
-  // Create a local video track from the video captured by a camera.
-  // channelParameters.localVideoTrack =
-  // Append the local video container to the page body.
-
-  // videoElement
-  // videoElement2
-
-  const videoArray = [videoElement]
-  videoArray.forEach((elemnt) => {
-    videoGorup.append(elemnt);
-  })
 
 
-  // Publish the local audio and video tracks in the channel.
-  // Play the local video track.
-  if (channelParameters) {
-    channelParameters.localVideoTrack.play(videoElement);
-  }
 };
 
 export async function setUpProject(c: string = '') {
