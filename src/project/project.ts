@@ -1,5 +1,5 @@
+import AgoraRTC, { IAgoraRTCClient, IAgoraRTCRemoteUser } from 'agora-rtc-sdk-ng'
 import AgoraRTM, { RTMClient } from 'agora-rtm-sdk'
-import AgoraRTC, { CameraVideoTrackInitConfig, IAgoraRTCClient, IAgoraRTCRemoteUser } from 'agora-rtc-sdk-ng'
 
 
 const tempToken = ''
@@ -99,7 +99,7 @@ const setUpVideo = async (uid: string, token: string, appId: string) => {
       await AgoraRTC.createCameraVideoTrack()
       // await AgoraRTC.createScreenVideoTrack({ displaySurface: 'window' }, 'enable')
     }
-
+    
     await client.publish([
       channelParameters.localAudioTrack,
       channelParameters.localVideoTrack,

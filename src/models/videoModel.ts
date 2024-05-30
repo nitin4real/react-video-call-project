@@ -1,4 +1,5 @@
-import AgoraRTC, { IAgoraRTCClient, IAgoraRTCRemoteUser, IDataChannelConfig, ILocalTrack, UID } from "agora-rtc-react"
+import AgoraRTC, { IAgoraRTCClient, IAgoraRTCRemoteUser, ILocalTrack } from "agora-rtc-react"
+import { IMediaType, IVideoConnectionConfig, IVideoMeetListeners } from "../interface/interfaces"
 
 export class VideoModel {
 
@@ -14,16 +15,19 @@ export class VideoModel {
         this.joined = false
     }
 
-    resetServices = () => {
+    resetServices = async () => {
         try {
-            this.videoEngine.leave()
+            await this.videoEngine.leave()
             this.joined = false
         } catch (e) {
             console.log('A Error Occured. (While Leaving Video Services)', e)
         }
     }
 
-    joinChannel = async (config: IConnectionConfig) => {
+    joinChannel = async (config: IVideoConnectionConfig) => {
+        if (this.joined) {
+            await this.resetServices()
+        }
         try {
             await this.videoEngine.join(
                 config.appId,
@@ -44,23 +48,25 @@ export class VideoModel {
         this.videoEngine.on('user-unpublished', listeners.onUserUnpublished)
     }
 
-    publishVideo = (videoTrack: ILocalTrack) => {//these 4 return a promise handle them
-        this.videoEngine.publish(videoTrack)
+    subscribe = (remoteUser: IAgoraRTCRemoteUser, mediaType: IMediaType) => {
+        return this.videoEngine.subscribe(remoteUser, mediaType)
+    }
+
+    publishVideo = (videoTrack: ILocalTrack) => {
+        return this.videoEngine.publish(videoTrack)
     }
 
     publishAudio = (audioTrack: ILocalTrack) => {
-        this.videoEngine.publish(audioTrack)
+        return this.videoEngine.publish(audioTrack)
     }
 
     unpublishVideo = (videoTrack: ILocalTrack) => {
-        this.videoEngine.unpublish(videoTrack)
+        return this.videoEngine.unpublish(videoTrack)
     }
 
     unpublishAudio = (audioTrack: ILocalTrack) => {
         this.videoEngine.unpublish(audioTrack)
     }
-
-
 
     setMuteStatus = (isActive: boolean) => {
 
@@ -71,20 +77,3 @@ export class VideoModel {
     }
 
 }
-
-export interface IConnectionConfig {
-    appId: string,
-    channelName: string,
-    token: string,
-    uid: UID
-}
-
-export interface IVideoMeetListeners {
-    onUserJoined: (user: IAgoraRTCRemoteUser) => void
-    onUserLeft: (user: IAgoraRTCRemoteUser, reason: string) => void,
-    onUserPublished: (user: IAgoraRTCRemoteUser, mediaType: "audio" | "video" | "datachannel", config?: IDataChannelConfig | undefined) => void,
-    onUserUnpublished: (user: IAgoraRTCRemoteUser, mediaType: "audio" | "video" | "datachannel", config?: IDataChannelConfig | undefined) => void
-
-}
-
-//identify each user using UID only create and assign a uid on time of login

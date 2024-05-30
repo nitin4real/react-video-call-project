@@ -1,18 +1,41 @@
 import axios from "axios";
+import { SetupState } from "./interface/interfaces";
+import { ITokenResponse } from "./interface/interfaces";
 
-export const GenerateTokenForUserID = async (userId: string, channelName: string = '') => {
-    try {
-        console.log('attempt to get token')
-        const response = await axios.get(`https://nitinsingh.in:3012/getToken`,{
-            params: {
-                userId
-            }
-        })
-        console.log(response.data)
-        return response.data
-    }
-    catch (e) {
-        console.log(e)
-        return ''
+class AgoraTokenHelper {
+    isOccupied: boolean = false
+    GenerateTokenForUserID = async (
+        userId: string, channelName: string = '',
+        onComplete: (status: SetupState, response: ITokenResponse) => void
+    ) => {
+        if (this.isOccupied) return
+        this.isOccupied = true
+        try {
+            console.log('attempt to get token')
+            const response = await axios.get(`http://localhost:3013/getToken`, {
+                params: {
+                    userId,
+                    channelName
+                }
+            })
+            console.log(response.data)
+            onComplete('success', response.data)
+        }
+
+        catch (e) {
+            console.log("Error in retriving tokens")
+            onComplete('error', {
+                appid: "",
+                tokens: {
+                    rtmToken: "",
+                    rtcToken: ""
+                }
+            })
+        }
+
+        this.isOccupied = false
     }
 }
+
+const tokenGenerator = new AgoraTokenHelper()
+export { tokenGenerator }

@@ -1,25 +1,18 @@
-import { useState } from 'react';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import './App.css';
-import { ChatComponent } from './components/ChatComponent';
 import { JoinMeetComponent } from './components/JoinMeetComponent';
+import { MeetScreen } from './screens/MeetScreen';
 
-
-//fix for video and chat both
 function App() {
-  const [isLoading, setIsLoading] = useState(true)
-
-  const loginSucces = (status: boolean) => {
-    setIsLoading(status)
-  }
-  if (isLoading) {
-    return <JoinMeetComponent onLogin={loginSucces} />
-  }
   return (
-    <>
-      {isLoading ? <></> : <ChatComponent />}
-    </>
-  );
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<JoinMeetComponent />} />
+        <Route path="/meet" element={<MeetScreen />} />
+        <Route path="/meet/:channelname/" element={<MeetScreen />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
 export default App;
-
