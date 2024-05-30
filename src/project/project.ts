@@ -7,6 +7,17 @@ const APP_ID = ""
 const token = ''
 const uid = ''
 const channelName = 'mainchatroom'
+const videoGorup: any = document.getElementById('video-group')
+var videoElement = document.createElement('video');
+const videoElementGenerator = (uid: string) => {
+  const newVideoElement = document.createElement('video');
+  newVideoElement.setAttribute('width', '320');
+  newVideoElement.setAttribute('height', '180');
+  newVideoElement.setAttribute('id', 'video' + uid)
+  newVideoElement.classList.add('video-circle')
+  return newVideoElement
+
+}
 
 
 export async function loginUserByUserName(userName: string) {
@@ -47,7 +58,13 @@ const setUpVideo = async (uid: string, token: string, appId: string) => {
     codec: 'h264',
     mode: 'live'
   })
+
   client.setClientRole('host')
+
+  client.on('user-joined', (user: IAgoraRTCRemoteUser) => {
+    console.log(user)
+  })
+
 
   await join(client, {
     appId,
@@ -65,6 +82,10 @@ const setUpVideo = async (uid: string, token: string, appId: string) => {
     await client.subscribe(user, mediaType);
     console.log("subscribe success");
     eventsCallback("user-published", user, mediaType)
+    const elemnt = videoElementGenerator(String(user.uid))
+    videoGorup.append(elemnt);
+    user.audioTrack?.play()
+    user.videoTrack?.play(elemnt)
   });
 
   // Listen for the "user-unpublished" event.
@@ -77,31 +98,26 @@ const setUpVideo = async (uid: string, token: string, appId: string) => {
 }
 
 const join = async (agoraEngine: IAgoraRTCClient, config: any) => {
-  var videoElement = document.createElement('video');
-  var videoElement2 = document.createElement('video');
 
-  videoElement.setAttribute('width', '640');
-  videoElement.setAttribute('height', '360');
-  videoElement.setAttribute('controls', 'controls');
-
-  videoElement2.setAttribute('width', '640');
-  videoElement2.setAttribute('height', '360');
-  videoElement2.setAttribute('controls', 'controls');
+  videoElement.setAttribute('width', '320');
+  videoElement.setAttribute('height', '180');
 
   let channelParameters: any
 
   try {
-    channelParameters = {
-      localAudioTrack: await AgoraRTC.createMicrophoneAudioTrack(),
-      localVideoTrack: await AgoraRTC.createCameraVideoTrack()
-    }
-
     await agoraEngine.join(
       config.appId,
       config.channelName,
       config.token,
       config.uid
     );
+    channelParameters = {
+      localAudioTrack: await AgoraRTC.createMicrophoneAudioTrack(),
+      localVideoTrack: 
+      await AgoraRTC.createCameraVideoTrack()
+      // await AgoraRTC.createScreenVideoTrack({ displaySurface: 'window' }, 'enable')
+    }
+
     await agoraEngine.publish([
       channelParameters.localAudioTrack,
       channelParameters.localVideoTrack,
@@ -117,8 +133,7 @@ const join = async (agoraEngine: IAgoraRTCClient, config: any) => {
   // videoElement
   // videoElement2
 
-  const videoArray = [videoElement, videoElement2]
-  const videoGorup: any = document.getElementById('video-group')
+  const videoArray = [videoElement]
   videoArray.forEach((elemnt) => {
     videoGorup.append(elemnt);
   })
@@ -126,8 +141,9 @@ const join = async (agoraEngine: IAgoraRTCClient, config: any) => {
 
   // Publish the local audio and video tracks in the channel.
   // Play the local video track.
-
-  channelParameters.localVideoTrack.play(videoElement);
+  if (channelParameters) {
+    channelParameters.localVideoTrack.play(videoElement);
+  }
 };
 
 export async function setUpProject(c: string = '') {

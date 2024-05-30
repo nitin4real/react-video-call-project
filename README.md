@@ -1,6 +1,13 @@
-# Getting Started with Create React App
+# How To Use
+On the landing screen you see a Login, Enter your name and select a Avatar, Enter a room id, if the room is already created you will join that group with video and audio active after you give the requested permissions, as well as you will be able to see and chat with the other users. 
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Getting Started with Create React App
+
+Project Architecture[Design Link](https://app.diagrams.net/#G1DlNkG8W-paUzPc74hAh5DVpIS30Whshe#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D).
+
+
+In the project directory, you can run:
+
 
 ## Available Scripts
 
@@ -13,11 +20,6 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 The page will reload if you make edits.\
 You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
 ### `npm run build`
 
@@ -38,9 +40,3 @@ If you aren’t satisfied with the build tool and configuration choices, you can
 Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
 You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).

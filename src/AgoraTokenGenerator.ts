@@ -2,7 +2,8 @@ import axios from "axios";
 
 export const GenerateTokenForUserID = async (userId: string, channelName: string = '') => {
     try {
-        const response = await axios.get(`http://192.168.63.114:3020/getToken`,{
+        console.log('attempt to get token')
+        const response = await axios.get(`https://nitinsingh.in:3012/getToken`,{
             params: {
                 userId
             }
