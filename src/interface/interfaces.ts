@@ -9,7 +9,7 @@ export interface IMessage {
 export type SetupState = 'loading' | 'success' | 'error'
 
 export interface ITokenResponse {
-    appid: string;
+    appId: string;
     tokens: {
         rtmToken: string;
         rtcToken: string;

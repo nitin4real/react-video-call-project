@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { chatController } from "../controllers/chatController";
 import {
   IChatConnectionConfig,
@@ -10,12 +10,15 @@ import {
 import { ErrorComponent } from "./ErrorComponent";
 import Loader from "./Loader";
 
-
 const useChat = (config: IChatConnectionConfig) => {
   const [chatSetupState, setChatSetupState] = useState<SetupState>('loading');
   const [messagesList, setMessagesList] = useState<IMessage[]>([])
 
-  const listeners: IChatMeetListeners = {
+  const updateMessageList = (newMessage: IMessage) => {
+    setMessagesList((currentlist) => [...currentlist, newMessage]);
+  }
+
+  const listenersRef = useRef<IChatMeetListeners>({
     onMessage: (event: IChatEvent) => {
       const message = event.message
       console.log(message, event)
@@ -24,21 +27,23 @@ const useChat = (config: IChatConnectionConfig) => {
         timestamp: new Date(),
         userId: event.publisher
       };
-      setMessagesList(() => [...messagesList, newMessage]);
+      updateMessageList(newMessage)
 
     },
     onPresence: (event: IChatEvent) => {
       console.log(event)
     }
-  }
+  })
 
   const onCompleteCallback = (status: SetupState) => {
     setChatSetupState(status)
   }
-
+  useEffect(() => {
+    console.log('rebuild the whole thing', messagesList)
+  })
   useEffect(() => {
     if (chatSetupState === 'loading')
-      chatController.setupChatWithToken(config, listeners, onCompleteCallback)
+      chatController.setupChatWithToken(config, listenersRef.current, onCompleteCallback)
     else if (chatSetupState === 'success') {
 
     }
@@ -70,7 +75,7 @@ export const ChatComponent = ({ config }: { config: IChatConnectionConfig }) => 
         userId: 'self'
       };
       chatController.sendMessage(input)
-      setMessagesList([...messagesList, newMessage]);
+      setMessagesList((currentMessageList) => [...currentMessageList, newMessage]);
       setInput('');
     }
   };

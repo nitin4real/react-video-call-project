@@ -1,4 +1,4 @@
-import AgoraRTC, { IAgoraRTCRemoteUser, IDataChannelConfig, ILocalTrack } from "agora-rtc-react"
+import AgoraRTC, { IAgoraRTCRemoteUser, IDataChannelConfig, ILocalTrack, UID } from "agora-rtc-react"
 import { useEffect, useRef, useState } from "react"
 import { ErrorComponent } from "../components/ErrorComponent"
 import Loader from "../components/Loader"
@@ -13,61 +13,115 @@ interface IVideoMeetElement {
 const useVideoMeet = (config: IVideoConnectionConfig) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
     const [videoElementList, setVideoElementList] = useState<IVideoMeetElement[]>([])
+    const [selfVideo, setSelfVideo] = useState<ILocalTrack>()
+    const [selfAudio, setSelfAudio] = useState<ILocalTrack>()
 
-    const listeners: IVideoMeetListeners = {
+    const addVideoStream = (newVideo: IVideoMeetElement) => {
+        //add checks for multiple users with same id, ignore em
+        setVideoElementList((currentVideoList) => {
+            if (currentVideoList.find((videlElement) => {
+                return videlElement.user.uid === newVideo.user.uid
+            })) {
+                return currentVideoList
+            }
+
+            return [...currentVideoList, newVideo]
+        })
+    }
+
+    const removeVideoStream = (uid: UID) => {
+        setVideoElementList((currentVideoList) => {
+            return currentVideoList.filter((videoElement) => {
+                if (uid === videoElement.user.uid) return false
+                return true
+            })
+        })
+    }
+
+    const listenersRef = useRef<IVideoMeetListeners>({
         onUserJoined: (user: IAgoraRTCRemoteUser): void => {
             console.log('onUserJoined', user)
         },
         onUserLeft: (user: IAgoraRTCRemoteUser, reason: string): void => {
             console.log('onUserLeft', user)
         },
-        onUserPublished: (user: IAgoraRTCRemoteUser, mediaType: IMediaType, config?: IDataChannelConfig | undefined): void => {
-            videoController.subscribeToRemoteUser(user, mediaType)
+        onUserPublished: async (user: IAgoraRTCRemoteUser, mediaType: IMediaType, config?: IDataChannelConfig | undefined) => {
+            await videoController.subscribeToRemoteUser(user, mediaType)
             if (mediaType === 'video') {
-                const videoElement = {
+                const videoElement: IVideoMeetElement = {
                     user,
-                    element: user.videoTrack
+                    element: user.videoTrack as any
                 }
-                setVideoElementList([...videoElementList,])
-
+                addVideoStream(videoElement)
+            } else if (mediaType === 'audio') {
+                user.audioTrack?.play()
             }
             console.log('onUserPublished', user)
         },
         onUserUnpublished: (user: IAgoraRTCRemoteUser, mediaType: IMediaType, config?: IDataChannelConfig | undefined): void => {
-            console.log('onUserUnpublished', user)
+            if (mediaType === 'video') {
+                removeVideoStream(user.uid)
+            }
         }
-    }
+    })
 
     const onCompleteCallback = (status: SetupState) => {
         setVideoSetupState(status)
     }
+    // videoController.setMuteStatus(false,)
 
     useEffect(() => {
         if (videoSetupState === 'loading')
-            videoController.setupVideoWithToken(config, listeners, onCompleteCallback)
+            videoController.setupVideoWithToken(config, listenersRef.current, onCompleteCallback)
         else if (videoSetupState === 'success') {
             AgoraRTC.createCameraVideoTrack().then(
                 (track) => {
-                    const emptyUser: any = null
+                    const emptyUser: any = { uid: 'self' }
 
                     const videlElement: IVideoMeetElement = {
                         element: track,
                         user: emptyUser
                     }
-                    setVideoElementList([...videoElementList, videlElement])
-                    videoController.publishFeed(track)
+                    addVideoStream(videlElement)
+                    setSelfVideo(track)
+                    setVideoStatus(false)
                 }
             ).catch(e => console.log('errrr'))
-            //add self
-            //here run a async function, pass it a video element ask, for permissions and all add that video element here only in next line
-            // videoController.publishFeed()
+
+            AgoraRTC.createMicrophoneAudioTrack().then(
+                (track) => {
+                    setSelfAudio(track)
+                    setAudioStatus(false)
+                }
+            ).catch(e => console.log('errrr'))
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [videoSetupState])
+
+    const setAudioStatus = (state: boolean) => {
+        if (selfAudio) {
+            videoController.setMuteStatus(state, selfAudio)
+        }
+    }
+
+    const setVideoStatus = (state: boolean) => {
+        if (selfVideo) {
+            videoController.setCamaraStatus(state, selfVideo)
+        }
+    }
+
+    const setMeetStatus = (mediaType: IMediaType, status: boolean) => {
+        if (mediaType === 'audio') {
+            setAudioStatus(status)
+        } else if (mediaType === 'video') {
+            setVideoStatus(status)
+        }
+    }
 
     return {
         videoSetupState,
-        videoElementList
+        videoElementList,
+        setMeetStatus,
     }
 }
 
@@ -77,7 +131,7 @@ export const MeetVideoComponent = ({
     config: IVideoConnectionConfig
 }) => {
     //start video service show loader for the process duration
-    const { videoSetupState, videoElementList } = useVideoMeet(config)
+    const { videoSetupState, videoElementList, setMeetStatus } = useVideoMeet(config)
     if (videoSetupState === 'loading') {
         return <Loader />
     } else if (videoSetupState === 'error') {
@@ -85,15 +139,16 @@ export const MeetVideoComponent = ({
     }
     return <>
         {
-            videoElementList.map((item) => {
-                return <VideoTrackView track={item.element} />
+            videoElementList.map((item, index) => {
+                return <VideoTrackView key={index} track={item.element} username={item.user?.uid} />
             })
         }
+        <VideoControls setMeetStatus={setMeetStatus} />
     </>
 }
 
 
-const VideoTrackView = ({ track }: any) => {
+const VideoTrackView = ({ track, username }: any) => {
     const videoRef = useRef(null);
 
     useEffect(() => {
@@ -106,5 +161,46 @@ const VideoTrackView = ({ track }: any) => {
         };
     }, [track]);
 
-    return <video ref={videoRef} autoPlay />;
+    return <div style={{ borderWidth: 2, borderColor: 'red', borderStyle: 'dashed' }}>
+        <div>{username}</div>
+        <video ref={videoRef} autoPlay />;
+    </div>
+};
+
+const VideoControls = ({ setMeetStatus }: { setMeetStatus: (mediaType: IMediaType, status: boolean) => void }) => {
+    const [audioMuted, setAudioMuted] = useState(true);
+    const [videoMuted, setVideoMuted] = useState(true);
+
+    // const setMeetStatus = (mediaType: IMediaType, status: boolean) => {
+    //     if (mediaType === 'audio') {
+    //         setAudioStatus(status)
+    //     } else if (mediaType === 'video') {
+    //         setVideoStatus(status)
+    //     }
+    // }
+    const toggleAudio = () => {
+        setMeetStatus('audio', audioMuted)
+        setAudioMuted(!audioMuted)
+    };
+
+    const toggleVideo = () => {
+        setMeetStatus('video', videoMuted)
+        setVideoMuted(!videoMuted);
+    };
+
+    useEffect(() => {
+        // This is just to reflect initial state
+
+    }, []);
+
+    return (
+        <div>
+            <button onClick={toggleAudio}>
+                {audioMuted ? 'Unmute Audio' : 'Mute Audio'}
+            </button>
+            <button onClick={toggleVideo}>
+                {videoMuted ? 'Turn Video On' : 'Turn Video Off'}
+            </button>
+        </div>
+    );
 };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { tokenGenerator } from "../AgoraTokenGenerator";
 import { ChatComponent } from "../components/ChatComponent";
@@ -15,19 +15,19 @@ const useMeet = () => {
     let username: string = String(localStorage.getItem('username'))
 
 
-    let videoConfig: IVideoConnectionConfig = {
+    const videoConfig = useRef<IVideoConnectionConfig>({
         appId: "",
         channelName: "",
         token: "",
         uid: ""
-    }
+    })
 
-    let chatConfig: IChatConnectionConfig = {
+    const chatConfig = useRef<IChatConnectionConfig>({
         uid: "",
         token: "",
         appId: "",
         channelName: ""
-    }
+    })
 
     while (!username) {
         username = prompt('Enter Your name') || ''
@@ -35,34 +35,37 @@ const useMeet = () => {
     }
 
     const onComplete = (status: SetupState, response: ITokenResponse) => {
-        videoConfig = {
-            appId: response.appid,
+        videoConfig.current = {
+            appId: response.appId,
             token: response.tokens.rtcToken,
             uid: username,
             channelName
         }
 
-        chatConfig = {
-            appId: response.appid,
+        chatConfig.current = {
+            appId: response.appId,
             token: response.tokens.rtmToken,
             uid: username,
             channelName
         }
         setTokenStatus(status)
     }
-
-    try {
-        tokenGenerator.GenerateTokenForUserID(username, channelName, onComplete)
-    } catch (e) {
-        console.log("Error in generating tokens")
-    }
+    useEffect(() => {
+        if (tokensRetrivedStatus === 'loading') {
+            try {
+                tokenGenerator.GenerateTokenForUserID(username, channelName, onComplete)
+            } catch (e) {
+                console.log("Error in generating tokens")
+            }
+        }
+    }, [tokensRetrivedStatus])
 
     return {
         channelName,
         username,
         tokensRetrivedStatus,
-        videoConfig,
-        chatConfig
+        videoConfig: videoConfig.current,
+        chatConfig: chatConfig.current
     }
 }
 
@@ -72,11 +75,11 @@ export const MeetScreen = () => {
     if (tokensRetrivedStatus === 'loading') {
         return <Loader />
     } else if (tokensRetrivedStatus === 'error') {
-        return <ErrorComponent message="Error in retriving Messages" />
+        return <ErrorComponent message="Error in joining meet. Please try again" />
     }
 
 
-    console.log('forwarding configs', videoConfig, chatConfig)
+    console.log('forwarding configs', videoConfig, chatConfig, tokensRetrivedStatus)
 
     return <>
         <ChatComponent
