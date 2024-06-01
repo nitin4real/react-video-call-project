@@ -153,11 +153,11 @@ const VideoTrackView = ({ track, username }: any) => {
 
     useEffect(() => {
         if (videoRef.current) {
-            track.play(videoRef.current);
+            track?.play(videoRef.current);
         }
 
         return () => {
-            track.stop();
+            track?.stop();
         };
     }, [track]);
 
