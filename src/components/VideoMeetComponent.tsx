@@ -15,11 +15,11 @@ export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionCo
     } else if (videoSetupState === 'error') {
         return <ErrorComponent message="Error In Loading Video Meet" />
     }
-
+    const containerStyle = mode === 'grid' ? 'video-container-grid' : 'video-container'
     return (
         <div className="video-meet">
             <MeetControls setMeetStatus={setMeetStatus} mode={mode} setMode={setMode} handleDisconnectClick={handleDisconnectClick} />
-            <div className={`video-container-${mode} ${mode}`}>
+            <div className={`${containerStyle} ${mode}`}>
                 {mode === 'spotlight'
                     ? <SpotlightView uidPlayerMap={uidPlayerMap} currentSpeakerUid={currentSpeakerUid} />
                     : <GridView uidPlayerMap={uidPlayerMap} currentSpeakerUid={currentSpeakerUid} />}
@@ -39,7 +39,7 @@ const SpotlightView = ({ uidPlayerMap, currentSpeakerUid }: { uidPlayerMap: IUid
         return viewItem.uid == currentSpeakerUid
     })
 
-    return <>
+    return <div style={{}}>
         <div style={{ display: 'flex', flexDirection: 'row' }}>
             {sideViewItems.map((video, index) =>
                 <div key={index} className="side-video">
@@ -53,7 +53,7 @@ const SpotlightView = ({ uidPlayerMap, currentSpeakerUid }: { uidPlayerMap: IUid
                 <VideoTrackView isSpeaking={true} username={currentSpeakerUid} key={currentSpeakerUid} track={spotlight.videoTrack} />
             </div> : <></>
         }
-    </>
+    </div>
 
 }
 

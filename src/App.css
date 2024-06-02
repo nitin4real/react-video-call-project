@@ -1,5 +1,3 @@
-
-
 .chat-container {
   display: flex;
   flex-direction: column;
@@ -148,6 +146,7 @@ button:hover {
   color: red;
   text-align: center;
 }
+
 .video-grid {
   display: grid;
   height: 100vh;
@@ -206,7 +205,8 @@ video {
 
 .left-pane {
   width: 70%;
-  background-color: #f0f0f0; /* Light gray background for visibility */
+  background-color: #f0f0f0;
+  /* Light gray background for visibility */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -215,7 +215,8 @@ video {
 
 .right-pane {
   width: 30%;
-  background-color: #d0d0d0; /* Slightly darker gray background for visibility */
+  background-color: #d0d0d0;
+  /* Slightly darker gray background for visibility */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -276,9 +277,10 @@ video {
   background-color: #f1f1f1;
 }
 
-.video-container-spotlight {
+
+/* change the be */
+.video-container {
   display: flex;
-  flex-direction: column;
   flex-wrap: wrap;
   flex-grow: 1;
   padding: 10px;
@@ -286,7 +288,7 @@ video {
   overflow: auto;
 }
 
-.video-container-grid {  
+.video-container-grid {
   display: flex;
   flex-wrap: wrap;
   flex-grow: 1;
@@ -294,6 +296,7 @@ video {
   background-color: #000;
   overflow: auto;
 }
+
 
 .video-container.spotlight .spotlight {
   flex-direction: column;
@@ -303,7 +306,7 @@ video {
 .video-container.spotlight .side-video {
   flex: 1;
   max-width: 200px;
-} 
+}
 
 
 .video-container.grid .grid-video {
