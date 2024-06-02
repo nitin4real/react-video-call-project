@@ -1,112 +1,184 @@
-import AgoraRTC, { IAgoraRTCRemoteUser, IDataChannelConfig, ILocalTrack, UID } from "agora-rtc-react"
+import AgoraRTC, { IAgoraRTCRemoteUser, ICameraVideoTrack, IDataChannelConfig, ILocalTrack, UID } from "agora-rtc-react"
 import { useEffect, useRef, useState } from "react"
 import { ErrorComponent } from "../components/ErrorComponent"
 import Loader from "../components/Loader"
 import { videoController } from "../controllers/videoController"
 import { IMediaType, IVideoConnectionConfig, IVideoMeetListeners, SetupState } from "../interface/interfaces"
+import { IMicrophoneAudioTrack } from "agora-rtc-sdk-ng"
 
 interface IVideoMeetElement {
     user: IAgoraRTCRemoteUser
     element: ILocalTrack
 }
+interface IUidPlayerMap {
+    uid: Number,
+    videoTrack: ICameraVideoTrack | undefined
+    audioTrack: IMicrophoneAudioTrack | undefined
+}
 
 const useVideoMeet = (config: IVideoConnectionConfig) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
-    const [videoElementList, setVideoElementList] = useState<IVideoMeetElement[]>([])
-    const [selfVideo, setSelfVideo] = useState<ILocalTrack>()
-    const [selfAudio, setSelfAudio] = useState<ILocalTrack>()
+    const [currentSpeakerUid, setCurrentSpeakerUid] = useState<Number>(-1)
+    const [uidPlayerMap, setUidPlayerMap] = useState<IUidPlayerMap[]>([])
 
-    const addVideoStream = (newVideo: IVideoMeetElement) => {
-        //add checks for multiple users with same id, ignore em
-        setVideoElementList((currentVideoList) => {
-            if (currentVideoList.find((videlElement) => {
-                return videlElement.user.uid === newVideo.user.uid
-            })) {
-                return currentVideoList
-            }
-
-            return [...currentVideoList, newVideo]
+    const pushInUidPlayerMap = (uid: Number) => {
+        setUidPlayerMap((currentMap) => {
+            return [
+                ...currentMap,
+                {
+                    uid,
+                    videoTrack: undefined,
+                    audioTrack: undefined
+                }
+            ]
         })
     }
 
-    const removeVideoStream = (uid: UID) => {
-        setVideoElementList((currentVideoList) => {
-            return currentVideoList.filter((videoElement) => {
-                if (uid === videoElement.user.uid) return false
-                return true
+    const removeUserFromMap = (uid: Number) => {
+        setUidPlayerMap((currentMap) => {
+            return currentMap.filter((value) => {
+                return value.uid != uid
             })
         })
     }
 
+    const addVideoTrackToMap = (uid: Number, videoTrack: any) => {
+        setUidPlayerMap((currentMap) => {
+            return currentMap.map((singleMapping) => {
+                if (singleMapping.uid == uid) {
+                    return {
+                        uid,
+                        videoTrack,
+                        audioTrack: singleMapping.audioTrack
+                    }
+                } else return singleMapping
+            })
+        })
+    }
+
+    const removeVideoTrackFromMap = (uid: Number) => {
+        setUidPlayerMap((currentMap) => {
+            return currentMap.map((singleMapping: any) => {
+                if (singleMapping.uid == uid) {
+                    singleMapping?.videoTrack?.close()
+                    return {
+                        uid,
+                        videoTrack: undefined,
+                        audioTrack: singleMapping.audioTrack
+                    }
+                } else return singleMapping
+            })
+        })
+    }
+
+    const addAudioTrackToMap = (uid: Number, audioTrack: any) => {
+        setUidPlayerMap((currentMap) => {
+            return currentMap.map((singleMapping) => {
+                if (singleMapping.uid == uid) {
+                    return {
+                        uid,
+                        videoTrack: singleMapping.videoTrack,
+                        audioTrack
+                    }
+                } else return singleMapping
+            })
+        })
+    }
+
+    const removeAudioTrackFromMap = (uid: Number) => {
+        setUidPlayerMap((currentMap) => {
+            return currentMap.map((singleMapping) => {
+                if (singleMapping.uid == uid) {
+                    singleMapping?.audioTrack?.close()
+
+                    return {
+                        uid,
+                        videoTrack: singleMapping.videoTrack,
+                        audioTrack: undefined
+                    }
+                } else return singleMapping
+            })
+        })
+    }
+
+
     const listenersRef = useRef<IVideoMeetListeners>({
         onUserJoined: (user: IAgoraRTCRemoteUser): void => {
-            console.log('onUserJoined', user)
+            pushInUidPlayerMap(Number(user?.uid))
         },
         onUserLeft: (user: IAgoraRTCRemoteUser, reason: string): void => {
-            console.log('onUserLeft', user)
+            removeUserFromMap(Number(user?.uid))
         },
         onUserPublished: async (user: IAgoraRTCRemoteUser, mediaType: IMediaType, config?: IDataChannelConfig | undefined) => {
             await videoController.subscribeToRemoteUser(user, mediaType)
             if (mediaType === 'video') {
-                const videoElement: IVideoMeetElement = {
-                    user,
-                    element: user.videoTrack as any
-                }
-                addVideoStream(videoElement)
+                addVideoTrackToMap(Number(user?.uid), user?.videoTrack)
             } else if (mediaType === 'audio') {
-                user.audioTrack?.play()
+                user?.audioTrack?.play()
+                addAudioTrackToMap(Number(user?.uid), user?.audioTrack)
             }
-            console.log('onUserPublished', user)
         },
         onUserUnpublished: (user: IAgoraRTCRemoteUser, mediaType: IMediaType, config?: IDataChannelConfig | undefined): void => {
             if (mediaType === 'video') {
-                removeVideoStream(user.uid)
+                removeVideoTrackFromMap(Number(user?.uid))
+            } else if (mediaType === 'audio') {
+                removeAudioTrackFromMap(Number(user?.uid))
             }
+        },
+        onVolumnIndicator: (speakers) => {
+            speakers?.forEach(speaker => {
+                console.log(speaker.level, speaker?.level > 100)
+                if (speaker?.uid && speaker?.level > 40) {
+                    setCurrentSpeakerUid(speaker.uid)
+                }
+            })
         }
     })
 
     const onCompleteCallback = (status: SetupState) => {
         setVideoSetupState(status)
     }
-    // videoController.setMuteStatus(false,)
 
     useEffect(() => {
         if (videoSetupState === 'loading')
             videoController.setupVideoWithToken(config, listenersRef.current, onCompleteCallback)
         else if (videoSetupState === 'success') {
-            AgoraRTC.createCameraVideoTrack().then(
-                (track) => {
-                    const emptyUser: any = { uid: 'self' }
-
-                    const videlElement: IVideoMeetElement = {
-                        element: track,
-                        user: emptyUser
-                    }
-                    addVideoStream(videlElement)
-                    setSelfVideo(track)
-                    setVideoStatus(false)
-                }
-            ).catch(e => console.log('errrr'))
-
-            AgoraRTC.createMicrophoneAudioTrack().then(
-                (track) => {
-                    setSelfAudio(track)
-                    setAudioStatus(false)
-                }
-            ).catch(e => console.log('errrr'))
+            pushInUidPlayerMap(Number(config?.uid))
+            setVideoStatus(true)
+            setAudioStatus(true)
         }
+        return () => { }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [videoSetupState])
 
+
     const setAudioStatus = (state: boolean) => {
-        if (selfAudio) {
-            videoController.setMuteStatus(state, selfAudio)
+        if (state === true) {
+            AgoraRTC.createMicrophoneAudioTrack().then(
+                (track) => {
+                    addAudioTrackToMap(Number(config.uid), track)
+                    videoController.setAudioStatus(true, track)
+                }
+            ).catch(e => console.log('errrr'))
+        } else {
+            removeAudioTrackFromMap(Number(config.uid))
         }
     }
 
     const setVideoStatus = (state: boolean) => {
-        if (selfVideo) {
-            videoController.setCamaraStatus(state, selfVideo)
+        if (state === true) {
+            AgoraRTC.createCameraVideoTrack().then(
+                (track) => {
+                    addVideoTrackToMap(Number(config.uid), track)
+                    videoController.setCamaraStatus(true, track)
+                }
+            ).catch(e => console.log('errrr'))
+        } else {
+            const selfVideoTrack = uidPlayerMap.find((item) => item.uid === Number(config.uid))?.videoTrack
+            if (selfVideoTrack) {
+                videoController.setCamaraStatus(false, selfVideoTrack)
+            }
+            removeVideoTrackFromMap(Number(config.uid))
         }
     }
 
@@ -120,8 +192,9 @@ const useVideoMeet = (config: IVideoConnectionConfig) => {
 
     return {
         videoSetupState,
-        videoElementList,
         setMeetStatus,
+        currentSpeakerUid,
+        uidPlayerMap
     }
 }
 
@@ -130,25 +203,28 @@ export const MeetVideoComponent = ({
 }: {
     config: IVideoConnectionConfig
 }) => {
-    //start video service show loader for the process duration
-    const { videoSetupState, videoElementList, setMeetStatus } = useVideoMeet(config)
+
+    const { videoSetupState, setMeetStatus, currentSpeakerUid, uidPlayerMap } = useVideoMeet(config)
     if (videoSetupState === 'loading') {
         return <Loader />
     } else if (videoSetupState === 'error') {
         return <ErrorComponent message="Error In Loading Video Meet" />
     }
+
     return <>
-        {
-            videoElementList.map((item, index) => {
-                return <VideoTrackView key={index} track={item.element} username={item.user?.uid} />
-            })
-        }
+        <div className={`video-grid video-grid-${uidPlayerMap.length}`}>
+            {uidPlayerMap.map(({ uid, videoTrack }, index) => (
+                <div key={index} className="video-container">
+                    <VideoTrackView isSpeaking={currentSpeakerUid == uid} key={index} track={videoTrack} />
+                </div>
+            ))}
+        </div>
         <VideoControls setMeetStatus={setMeetStatus} />
     </>
 }
 
 
-const VideoTrackView = ({ track, username }: any) => {
+const VideoTrackView = ({ track, username, isSpeaking }: any) => {
     const videoRef = useRef(null);
 
     useEffect(() => {
@@ -161,23 +237,16 @@ const VideoTrackView = ({ track, username }: any) => {
         };
     }, [track]);
 
-    return <div style={{ borderWidth: 2, borderColor: 'red', borderStyle: 'dashed' }}>
+    return <div style={{ borderWidth: 2, borderColor: isSpeaking ? 'yellow' : 'red', borderStyle: 'dashed' }}>
         <div>{username}</div>
         <video ref={videoRef} autoPlay />;
     </div>
 };
 
 const VideoControls = ({ setMeetStatus }: { setMeetStatus: (mediaType: IMediaType, status: boolean) => void }) => {
-    const [audioMuted, setAudioMuted] = useState(true);
-    const [videoMuted, setVideoMuted] = useState(true);
+    const [audioMuted, setAudioMuted] = useState(false);
+    const [videoMuted, setVideoMuted] = useState(false);
 
-    // const setMeetStatus = (mediaType: IMediaType, status: boolean) => {
-    //     if (mediaType === 'audio') {
-    //         setAudioStatus(status)
-    //     } else if (mediaType === 'video') {
-    //         setVideoStatus(status)
-    //     }
-    // }
     const toggleAudio = () => {
         setMeetStatus('audio', audioMuted)
         setAudioMuted(!audioMuted)

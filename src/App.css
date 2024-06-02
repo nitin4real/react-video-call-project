@@ -42,9 +42,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  border: 1px solid #ccc;
+  width: 90%;
+  border: 1px solid #000;
   border-radius: 8px;
   padding: 16px;
   background-color: #f9f9f9;
@@ -55,23 +54,6 @@
   overflow-y: auto;
   padding: 8px;
   border-bottom: 1px solid #ccc;
-}
-
-.message {
-  margin-bottom: 12px;
-}
-
-.message-text {
-  background-color: #e1ffc7;
-  padding: 8px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.message-timestamp {
-  font-size: 0.8em;
-  color: #888;
-  margin-top: 4px;
 }
 
 .input-container {
@@ -202,4 +184,113 @@ button:hover {
   font-size: 18px;
   color: red;
   text-align: center;
+}
+.video-grid {
+  display: grid;
+  height: 100vh;
+  width: 100vw;
+}
+
+.video-grid-1 {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+.video-grid-2 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+}
+
+.video-grid-3,
+.video-grid-4 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.video-grid-5,
+.video-grid-6 {
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.video-grid-7,
+.video-grid-8,
+.video-grid-9 {
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+}
+
+.video-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.full-screen-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.left-pane {
+  width: 70%;
+  background-color: #f0f0f0; /* Light gray background for visibility */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.right-pane {
+  width: 30%;
+  background-color: #d0d0d0; /* Slightly darker gray background for visibility */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+
+
+
+.chat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 10px 0;
+  padding: 10px;
+  max-width: 60%;
+  border-radius: 10px;
+  background-color: #f1f1f1;
+}
+
+.chat-item.current-user {
+  align-self: flex-end;
+  background-color: #e1ffc7;
+  align-items: flex-end;
+  margin-left: auto;
+}
+
+.user-id {
+  font-size: 0.75rem;
+  color: gray;
+  margin-right: 10px;
+}
+
+.message-text {
+  font-size: 1rem;
+  margin-bottom: 5px;
+}
+
+.timestamp {
+  font-size: 0.75rem;
+  color: gray;
 }

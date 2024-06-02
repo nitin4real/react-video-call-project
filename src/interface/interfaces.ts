@@ -14,6 +14,7 @@ export interface ITokenResponse {
         rtmToken: string;
         rtcToken: string;
     };
+    uid: string
 }
 
 export interface IChatEvent {
@@ -38,12 +39,16 @@ export interface IChatConnectionConfig {
     appId: string
     channelName: string
 }
-
+interface ISpeaker {
+    uid: number
+    level: number
+}
 export interface IVideoMeetListeners {
     onUserJoined: (user: IAgoraRTCRemoteUser) => void
     onUserLeft: (user: IAgoraRTCRemoteUser, reason: string) => void
     onUserPublished: (user: IAgoraRTCRemoteUser, mediaType: IMediaType, config?: IDataChannelConfig | undefined) => void
     onUserUnpublished: (user: IAgoraRTCRemoteUser, mediaType: IMediaType, config?: IDataChannelConfig | undefined) => void
+    onVolumnIndicator: (speakers: ISpeaker[]) => void
 
 }
 export type IMediaType = "audio" | "video" | "datachannel"

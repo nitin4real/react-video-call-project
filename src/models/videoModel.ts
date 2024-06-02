@@ -33,8 +33,9 @@ export class VideoModel {
                 config.appId,
                 config.channelName,
                 config.token,
-                config.uid
+                Number(config.uid)
             )
+            this.videoEngine.enableAudioVolumeIndicator()
             this.joined = true
         } catch (e) {
             console.log('A Error Occured. (While Joining Video Services).', e)
@@ -46,6 +47,7 @@ export class VideoModel {
         this.videoEngine.on('user-left', listeners.onUserLeft)
         this.videoEngine.on('user-published', listeners.onUserPublished)
         this.videoEngine.on('user-unpublished', listeners.onUserUnpublished)
+        this.videoEngine.on('volume-indicator',listeners.onVolumnIndicator)
     }
 
     subscribe = (remoteUser: IAgoraRTCRemoteUser, mediaType: IMediaType) => {
@@ -65,7 +67,7 @@ export class VideoModel {
     }
 
     unpublishAudio = (audioTrack: ILocalTrack) => {
-        this.videoEngine.unpublish(audioTrack)
+        return this.videoEngine.unpublish(audioTrack)
     }
 
     setMuteStatus = (isActive: boolean) => {

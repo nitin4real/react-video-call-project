@@ -21,7 +21,6 @@ const useChat = (config: IChatConnectionConfig) => {
   const listenersRef = useRef<IChatMeetListeners>({
     onMessage: (event: IChatEvent) => {
       const message = event.message
-      console.log(message, event)
       const newMessage = {
         text: message,
         timestamp: new Date(),
@@ -38,9 +37,6 @@ const useChat = (config: IChatConnectionConfig) => {
   const onCompleteCallback = (status: SetupState) => {
     setChatSetupState(status)
   }
-  useEffect(() => {
-    console.log('rebuild the whole thing', messagesList)
-  })
   useEffect(() => {
     if (chatSetupState === 'loading')
       chatController.setupChatWithToken(config, listenersRef.current, onCompleteCallback)
@@ -72,7 +68,7 @@ export const ChatComponent = ({ config }: { config: IChatConnectionConfig }) => 
       const newMessage = {
         text: input,
         timestamp: new Date(),
-        userId: 'self'
+        userId: config.uid
       };
       chatController.sendMessage(input)
       setMessagesList((currentMessageList) => [...currentMessageList, newMessage]);
@@ -90,13 +86,7 @@ export const ChatComponent = ({ config }: { config: IChatConnectionConfig }) => 
     <div className="chat-container">
       <div className="messages-container">
         {messagesList.map((message, index) => (
-          <div key={index} className="message">
-            <div className="message-text">{message.text}</div>
-            <div className="message-timestamp">
-              {message.timestamp.toLocaleTimeString()}
-              {message.userId}
-            </div>
-          </div>
+          <ChatItem key={index} message={message} currentUserId={config.uid} />
         ))}
       </div>
       <div className="input-container">
@@ -110,4 +100,36 @@ export const ChatComponent = ({ config }: { config: IChatConnectionConfig }) => 
       </div>
     </div>
   );
+}
+
+const ChatItem = ({ message, currentUserId }: any) => {
+  const isCurrentUser = message.userId === currentUserId;
+  const formattedTime = new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return (
+    <div className={`chat-item ${isCurrentUser ? 'current-user' : ''}`}>
+      <div className="message-text">{message.text}</div>
+      <div className="message-info">
+        {isCurrentUser ? <></> : <span className="user-id">send by: {message.userId}</span>}
+        <div className="timestamp">{formattedTime}</div>
+      </div>
+    </div>
+  );
+};
+
+
+export function formatTimeToHHMM(time: Date) {
+  let date;
+
+  if (typeof time === 'string') {
+    date = new Date(`1970-01-01T${time}Z`);
+  } else if (time instanceof Date) {
+    date = time;
+  } else {
+    throw new Error('Invalid input type. Expected a string or Date object.');
+  }
+
+  const hours = String(date.getUTCHours()).padStart(2, '0');
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+
+  return `${hours}:${minutes}`;
 }

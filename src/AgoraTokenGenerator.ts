@@ -11,7 +11,7 @@
             this.isOccupied = true
             try {
                 console.log('attempt to get token')
-                const response = await axios.get(`http://nitinsingh.in:3013/getToken`, {
+                const response = await axios.get(`https://nitinsingh.in:3012/getToken`, {
                     params: {
                         userId,
                         channelName
@@ -28,7 +28,8 @@
                     tokens: {
                         rtmToken: "",
                         rtcToken: ""
-                    }
+                    },
+                    uid: ""
                 })
             }
 

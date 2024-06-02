@@ -3,7 +3,7 @@ import { IMediaType, IVideoConnectionConfig, IVideoMeetListeners, SetupState } f
 import { VideoModel } from "../models/videoModel"
 
 class VideoController {
-    videoModel: VideoModel | undefined
+    private videoModel: VideoModel | undefined
     isControllerAvailable: boolean = true
 
     resetController = async () => {
@@ -29,8 +29,8 @@ class VideoController {
     setUpVideo = async (config: IVideoConnectionConfig, listeners: IVideoMeetListeners) => {
         this.videoModel = new VideoModel()
         try {
-            await this.videoModel.joinChannel(config)
             this.videoModel.setListeners(listeners)
+            await this.videoModel.joinChannel(config)
             //set self video
         } catch (e) {
             console.log('Error in video Setup', e)
@@ -58,7 +58,7 @@ class VideoController {
         }
     }
 
-    setMuteStatus = async (isActive: boolean, audioTrack: ILocalTrack) => {
+    setAudioStatus = async (isActive: boolean, audioTrack: ILocalTrack) => {
         try {
             if (isActive) {
                 await this.videoModel?.publishAudio(audioTrack)

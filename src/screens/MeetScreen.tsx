@@ -16,10 +16,10 @@ const useMeet = () => {
 
 
     const videoConfig = useRef<IVideoConnectionConfig>({
+        uid: "",
+        token: "",
         appId: "",
         channelName: "",
-        token: "",
-        uid: ""
     })
 
     const chatConfig = useRef<IChatConnectionConfig>({
@@ -38,18 +38,19 @@ const useMeet = () => {
         videoConfig.current = {
             appId: response.appId,
             token: response.tokens.rtcToken,
-            uid: username,
+            uid: response.uid,
             channelName
         }
 
         chatConfig.current = {
             appId: response.appId,
             token: response.tokens.rtmToken,
-            uid: username,
+            uid: response.uid,
             channelName
         }
         setTokenStatus(status)
     }
+
     useEffect(() => {
         if (tokensRetrivedStatus === 'loading') {
             try {
@@ -71,20 +72,19 @@ const useMeet = () => {
 
 export const MeetScreen = () => {
     const { tokensRetrivedStatus, videoConfig, chatConfig } = useMeet()
-    //make sure to set the current user details in the sessionStore before rendering the meet screen
+
     if (tokensRetrivedStatus === 'loading') {
         return <Loader />
     } else if (tokensRetrivedStatus === 'error') {
         return <ErrorComponent message="Error in joining meet. Please try again" />
     }
 
-
-    console.log('forwarding configs', videoConfig, chatConfig, tokensRetrivedStatus)
-
-    return <>
-        <ChatComponent
-            config={chatConfig} />
-        <MeetVideoComponent
-            config={videoConfig} />
-    </>
+    return <div className="full-screen-container">
+        <div className="left-pane">
+            <MeetVideoComponent config={videoConfig} />
+        </div>
+        <div className="right-pane">
+            <ChatComponent config={chatConfig} />
+        </div>
+    </div>
 }
