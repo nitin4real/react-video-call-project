@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { tokenGenerator } from "../AgoraTokenGenerator";
+import { tokenGenerator } from "../utils/AgoraTokenGenerator";
 import { ChatComponent } from "../components/ChatComponent";
 import { ErrorComponent } from "../components/ErrorComponent";
 import Loader from "../components/Loader";
@@ -54,12 +54,14 @@ const useMeet = () => {
             uid: response.uid,
             channelName
         }
+        console.log('got the new tokens')
         setTokenStatus(status)
     }
 
     useEffect(() => {
         if (tokensRetrivedStatus === 'loading') {
             try {
+                console.log('getting the new tokens')
                 tokenGenerator.GenerateTokenForUserID(username, channelName, onComplete)
             } catch (e) {
                 console.log("Error in generating tokens")
@@ -81,10 +83,12 @@ export const MeetScreen = () => {
     const { tokensRetrivedStatus, videoConfig, chatConfig, disconnectAllConnections } = useMeet()
 
     if (tokensRetrivedStatus === 'loading') {
+    console.log('onloading - meetscreen')
         return <Loader />
     } else if (tokensRetrivedStatus === 'error') {
         return <ErrorComponent message="Error in joining meet. Please try again" />
     }
+    console.log('onsucess - meetscreen')
 
     return <div className="full-screen-container">
         <div className="left-pane">
