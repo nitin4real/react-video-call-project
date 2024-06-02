@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import './App.css';
-import { JoinMeetComponent } from './components/JoinMeetComponent';
+import { JoinMeetComponent } from './screens/JoinMeetScreen';
 import { MeetScreen } from './screens/MeetScreen';
 
 function App() {

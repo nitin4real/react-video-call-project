@@ -33,7 +33,7 @@ class VideoController {
             await this.videoModel.joinChannel(config)
             //set self video
         } catch (e) {
-            console.log('Error in video Setup', e)
+            console.log('Error in video Setup')
         }
     }
 

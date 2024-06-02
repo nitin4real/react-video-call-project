@@ -1,4 +1,6 @@
+import { ICameraVideoTrack } from "agora-rtc-react";
 import { IAgoraRTCRemoteUser, IDataChannelConfig, UID } from "agora-rtc-react";
+import { IMicrophoneAudioTrack } from "agora-rtc-sdk-ng";
 
 export interface IMessage {
     timestamp: Date;
@@ -58,4 +60,10 @@ export interface IVideoConnectionConfig {
     token: string
     uid: UID
 }
+export interface IUidPlayerMapItem {
+    uid: Number
+    videoTrack: ICameraVideoTrack | undefined
+    audioTrack: IMicrophoneAudioTrack | undefined
+}
 
+export type IUidPlayerMap = IUidPlayerMapItem[]

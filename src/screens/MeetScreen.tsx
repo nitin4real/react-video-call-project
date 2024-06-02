@@ -4,8 +4,10 @@ import { tokenGenerator } from "../AgoraTokenGenerator";
 import { ChatComponent } from "../components/ChatComponent";
 import { ErrorComponent } from "../components/ErrorComponent";
 import Loader from "../components/Loader";
-import { MeetVideoComponent } from "../components/VideoMeetComponent";
+import { VideoMeet } from "../components/VideoMeetComponent";
 import { IChatConnectionConfig, ITokenResponse, IVideoConnectionConfig, SetupState } from "../interface/interfaces";
+import { videoController } from "../controllers/videoController";
+import { chatController } from "../controllers/chatController";
 
 const useMeet = () => {
     const [tokensRetrivedStatus, setTokenStatus] = useState<SetupState>('loading');
@@ -14,6 +16,10 @@ const useMeet = () => {
     const channelName = pathValues[pathValues.length - 1]
     let username: string = String(localStorage.getItem('username'))
 
+    const disconnectAllConnections = () => {
+        videoController.resetController()
+        chatController.resetController()
+    }
 
     const videoConfig = useRef<IVideoConnectionConfig>({
         uid: "",
@@ -66,12 +72,13 @@ const useMeet = () => {
         username,
         tokensRetrivedStatus,
         videoConfig: videoConfig.current,
-        chatConfig: chatConfig.current
+        chatConfig: chatConfig.current,
+        disconnectAllConnections
     }
 }
 
 export const MeetScreen = () => {
-    const { tokensRetrivedStatus, videoConfig, chatConfig } = useMeet()
+    const { tokensRetrivedStatus, videoConfig, chatConfig, disconnectAllConnections } = useMeet()
 
     if (tokensRetrivedStatus === 'loading') {
         return <Loader />
@@ -81,7 +88,7 @@ export const MeetScreen = () => {
 
     return <div className="full-screen-container">
         <div className="left-pane">
-            <MeetVideoComponent config={videoConfig} />
+            <VideoMeet onDisconnect={disconnectAllConnections} config={videoConfig} />
         </div>
         <div className="right-pane">
             <ChatComponent config={chatConfig} />

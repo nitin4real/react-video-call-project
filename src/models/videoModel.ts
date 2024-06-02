@@ -20,7 +20,7 @@ export class VideoModel {
             await this.videoEngine.leave()
             this.joined = false
         } catch (e) {
-            console.log('A Error Occured. (While Leaving Video Services)', e)
+            console.log('A Error Occured. (While Leaving Video Services)')
         }
     }
 
@@ -38,7 +38,7 @@ export class VideoModel {
             this.videoEngine.enableAudioVolumeIndicator()
             this.joined = true
         } catch (e) {
-            console.log('A Error Occured. (While Joining Video Services).', e)
+            console.log('A Error Occured. (While Joining Video Services).')
         }
     }
 

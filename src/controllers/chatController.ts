@@ -31,7 +31,7 @@ class ChatController {
             await this.chatModel.joinChannel(config)
             this.chatModel.setListeners(listeners)
         } catch (e) {
-            console.log('Error in chat Setup', e)
+            console.log('Error in chat Setup')
         }
     }
 

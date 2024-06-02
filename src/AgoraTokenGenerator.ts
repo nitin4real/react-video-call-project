@@ -10,15 +10,12 @@
             if (this.isOccupied) return
             this.isOccupied = true
             try {
-                console.log('attempt to get token')
                 const response = await axios.get(`https://nitinsingh.in:3012/getToken`, {
                     params: {
                         userId,
                         channelName
                     },
                 })
-                console.log(response.data)
-                onComplete('success', response.data)
             }
 
             catch (e) {

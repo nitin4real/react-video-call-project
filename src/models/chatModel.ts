@@ -21,9 +21,10 @@ export class ChatModel {
     resetServices = async () => {
         try {
             await this.chatEngine?.unsubscribe(this.joinedChannelName)
+            await this.chatEngine?.logout()
             this.joinedChannelName = ''
         } catch (e) {
-            console.log('A Error Occured. (While Leaving Chat Services)', e)
+            console.log('A Error Occured. (While Leaving Chat Services)')
         }
     }
 
@@ -46,7 +47,7 @@ export class ChatModel {
             )
             this.joinedChannelName = config.channelName
         } catch (e) {
-            console.log('A Error Occured. (While Joining Chat Services).', e)
+            console.log('A Error Occured. (While Joining Chat Services).')
         }
     }
 
