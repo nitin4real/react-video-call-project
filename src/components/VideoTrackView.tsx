@@ -15,9 +15,11 @@ export const VideoTrackView = ({ track, username, isSpeaking }: any) => {
 
     return <div className="video-component" style={{ backgroundColor: isSpeaking ? '#4caf50' : 'white' }}>
         {isVideoDisabled
-            ? <img src={dummyUser} alt={username} />
+            ? <div className="video-alt-container">
+                <img src={dummyUser} alt={username} />
+            </div>
             :
-            <video ref={videoRef} autoPlay />
+            <video style={{ maxHeight: 500, objectFit: 'contain' }} ref={videoRef} autoPlay />
         }
         <p>{username}</p>
     </div>;
