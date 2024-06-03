@@ -1,42 +1,29 @@
-# How To Use
-On the landing screen you see a Login, Enter your name and select a Avatar, Enter a room id, if the room is already created you will join that group with video and audio active after you give the requested permissions, as well as you will be able to see and chat with the other users. 
+# Video Conferencing Web Application
+## Overview
+This project is a web-based video conferencing application that allows users to join virtual channels, interact with video and audio, and send text messages in real-time. It's designed to be user-friendly and intuitive, providing essential features for a seamless conferencing experience.
 
-## Getting Started with Create React App
+## Features
 
-Project Architecture[Design Link](https://app.diagrams.net/#G1DlNkG8W-paUzPc74hAh5DVpIS30Whshe#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D).
+### User Login:
+Enter your name and the channel you want to join.\
+If the channel does not exist, it will be created automatically.\
+Ensure that your friends enter the same channel name to join the same session.
 
+### Video Screen:
+View all active participants in the channel.\
+The currently speaking participant is highlighted in yellow.
 
-In the project directory, you can run:
+### Control Buttons (located at the top):
+Mute/Unmute: Toggle your microphone on or off.\
+Turn Camera On/Off: Enable or disable your video feed.
 
+### View Mode:
+Grid View: All participants are displayed in equal-sized tiles.
+Spotlight View: The active speaker is enlarged, with other participants shown in smaller tiles at the top.
 
-## Available Scripts
+## Chat Box (located on the right side):
+Send and receive text messages with all active users in the channel.
 
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+# Implementation
+The video call feature is implemented using agoraRTC and for the chatting agoraRTM(Signaling) is used.\
+For token generation a backend server is running on nitinsingh.in to generate rtc and rtm tokens as well as to keep to user names.
