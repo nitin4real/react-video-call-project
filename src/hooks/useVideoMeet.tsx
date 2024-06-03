@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { videoController } from "../controllers/videoController";
 import { IMediaType, IVideoConnectionConfig, IVideoMeetListeners, SetupState } from "../interface/interfaces";
 import { IUidPlayerMapItem } from "../interface/interfaces";
+import { userDataStore } from "../store/UserDataStore";
 
 export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
@@ -100,6 +101,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
 
     const listenersRef = useRef<IVideoMeetListeners>({
         onUserJoined: (user: IAgoraRTCRemoteUser): void => {
+            userDataStore.registerUser(String(user?.uid))
             pushInUidPlayerMap(Number(user?.uid));
         },
         onUserLeft: (user: IAgoraRTCRemoteUser, reason: string): void => {

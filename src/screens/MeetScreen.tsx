@@ -8,6 +8,7 @@ import { VideoMeet } from "../components/VideoMeetComponent";
 import { IChatConnectionConfig, ITokenResponse, IVideoConnectionConfig, SetupState } from "../interface/interfaces";
 import { videoController } from "../controllers/videoController";
 import { chatController } from "../controllers/chatController";
+import { userDataStore } from "../store/UserDataStore";
 
 const useMeet = () => {
     const [tokensRetrivedStatus, setTokenStatus] = useState<SetupState>('loading');
@@ -54,6 +55,8 @@ const useMeet = () => {
             uid: response.uid,
             channelName
         }
+        userDataStore.setCurrentUserName(String(username))
+        userDataStore.registerUser(String(response.uid))
         console.log('got the new tokens')
         setTokenStatus(status)
     }
@@ -83,7 +86,7 @@ export const MeetScreen = () => {
     const { tokensRetrivedStatus, videoConfig, chatConfig, disconnectAllConnections } = useMeet()
 
     if (tokensRetrivedStatus === 'loading') {
-    console.log('onloading - meetscreen')
+        console.log('onloading - meetscreen')
         return <Loader />
     } else if (tokensRetrivedStatus === 'error') {
         return <ErrorComponent message="Error in joining meet. Please try again" />

@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
 import dummyUser from '../images/user5.png'
+import { userDataStore } from "../store/UserDataStore";
 export const VideoTrackView = ({ track, username, isSpeaking }: any) => {
     const videoRef = useRef(null);
     const isVideoDisabled = !track
+    const fullUserName = userDataStore.getUserName(String(username))
     useEffect(() => {
         if (videoRef.current) {
             track?.play(videoRef.current);
@@ -13,6 +15,7 @@ export const VideoTrackView = ({ track, username, isSpeaking }: any) => {
         };
     }, [track]);
 
+
     return <div className="video-component" style={{ backgroundColor: isSpeaking ? '#4caf50' : 'white' }}>
         {isVideoDisabled
             ? <div className="video-alt-container">
@@ -21,6 +24,6 @@ export const VideoTrackView = ({ track, username, isSpeaking }: any) => {
             :
             <video style={{ maxHeight: 500, objectFit: 'contain' }} ref={videoRef} autoPlay />
         }
-        <p>{username}</p>
+        <p>{fullUserName}</p>
     </div>;
 };
