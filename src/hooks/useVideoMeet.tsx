@@ -1,11 +1,66 @@
 import AgoraRTC, { IAgoraRTCRemoteUser, IDataChannelConfig } from "agora-rtc-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { videoController } from "../controllers/videoController";
-import { IMediaType, IVideoConnectionConfig, IVideoMeetListeners, SetupState } from "../interface/interfaces";
-import { IUidPlayerMapItem } from "../interface/interfaces";
-import { userDataStore } from "../store/UserDataStore";
 import { Socket, io } from "socket.io-client";
+import { videoController } from "../controllers/videoController";
+import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState } from "../interface/interfaces";
+import { userDataStore } from "../store/UserDataStore";
+
+const socket = io('http://localhost:3013')
+let mediaRecorder: MediaRecorder | null = null;
+
+
+
+
+
+class TranslatorServices {
+    mediaRecorder: MediaRecorder
+    socket: Socket
+    constructor(socketEndPoint: string, stream: MediaStream) {
+        this.mediaRecorder = new MediaRecorder(stream)
+        this.socket = io(socketEndPoint)
+    }
+    
+}
+
+const TmpAsync = async () => {
+    new TranslatorServices(
+        'http://localhost:3013',
+        await navigator.mediaDevices.getUserMedia({ audio: true })
+    )
+}
+
+
+TmpAsync()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
@@ -183,40 +238,33 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
 
     const [recording, setRecording] = useState(true);
     const [transcript, setTranscript] = useState('');
-    const streaming = useRef(false)
-    const socket = useRef(io('http://localhost:3013')).current
     useEffect(() => {
 
-        let mediaRecorder: MediaRecorder | null = null;
         let audioChunks: BlobPart[] = [];
         const handleData = (e: any) => {
             audioChunks.push(e.data);
-            // console.log('eventdata from handle data',e.data)
-            // return
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
             const reader = new FileReader();
             reader.onload = () => {
                 const result = reader.result as string
                 const audioBase64 = result.split(',')[1];
-                // console.log('eventdata from handle data',result)
-                // return
-                // console.log('audio slice', new Date().toTimeString())
-                // console.log('audio slice ---', audioBase64)
-                socket?.emit('audioStream', audioBase64);
+                socket.emit('audioStream', audioBase64);
             };
             reader.readAsDataURL(audioBlob);
             audioChunks = [];
         };
-
+        console.log('rama rama in the condition to check mediarecorderd', mediaRecorder)
         if (!recording) {
-            console.log('maybe the stream is created twice -- ', recording)
+            console.log('rama rama starting');
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then(stream => {
                     mediaRecorder = new MediaRecorder(stream);
-                    mediaRecorder.start(5000);
+                    mediaRecorder.start(1000);
                     mediaRecorder.addEventListener('dataavailable', handleData);
+                    mediaRecorder.addEventListener('stop', handleData)
                 });
         } else if (mediaRecorder) {
+            console.log('rama rama stoping');
             (mediaRecorder as MediaRecorder).stop();
         }
 
@@ -227,15 +275,15 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         };
     }, [recording]);
 
-    // useEffect(() => {
-    //     socket.on('transcription', (data) => {
-    //         setTranscript(prev => `${prev} ${data}`);
-    //     });
+    useEffect(() => {
+        socket.on('transcription', (data) => {
+            // setTranscript(prev => `${prev} ${data}`);
+        });
 
-    //     return () => {
-    //         socket.off('transcription');
-    //     };
-    // }, []);
+        return () => {
+            socket.off('transcription');
+        };
+    }, []);
 
 
     const setMeetStatus = (mediaType: IMediaType, status: boolean) => {
