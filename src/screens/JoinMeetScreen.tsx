@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from 'react-router-dom';
-import { avatars } from "../constants/images";
 import { languageList } from "../constants/languageCodes";
 
 const LanguageDropdown = ({ selectedLanguage, setSelectedLanguage }: { selectedLanguage: string, setSelectedLanguage: (lang: string) => void }) => {
@@ -48,11 +47,11 @@ export const JoinMeetComponent = () => {
 
   const setSessionData = () => {
     localStorage.setItem('username', username)
-    if (selectedAvatarIndex === -1) {
-      localStorage.setItem('useravatar', avatars[selectedAvatarIndex])
-    } else {
-      localStorage.setItem('useravatar', avatars[0])
-    }
+    // if (selectedAvatarIndex === -1) {
+    //   localStorage.setItem('useravatar', avatars[selectedAvatarIndex])
+    // } else {
+    //   localStorage.setItem('useravatar', avatars[0])
+    // }
   }
 
   return (
