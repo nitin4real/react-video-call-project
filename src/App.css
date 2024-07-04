@@ -352,3 +352,30 @@ video {
   margin: auto;
   /* Center the image if it's smaller than the container */
 }
+
+.dropdown-container {
+  margin: 20px;
+  font-family: Arial, sans-serif;
+}
+
+label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+select {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+select:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+
+option:hover {
+  background-color: #4caf50;
+}

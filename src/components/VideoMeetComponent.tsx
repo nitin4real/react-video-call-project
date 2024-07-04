@@ -38,19 +38,18 @@ const SpotlightView = ({ uidPlayerMap, currentSpeakerUid }: { uidPlayerMap: IUid
     const spotlight = uidPlayerMap.find((viewItem) => {
         return viewItem.uid == currentSpeakerUid
     })
-
     return <div style={{}}>
         <div style={{ display: 'flex', flexDirection: 'row' }}>
             {sideViewItems.map((video, index) =>
                 <div key={index} className="side-video">
-                    <VideoTrackView isSpeaking={false} username={video.uid} key={index} track={video.videoTrack} />
+                    <VideoTrackView isSpeaking={false} key={index} userData={video} />
                 </div>
             )
             }
         </div>
         {spotlight ?
             <div key={currentSpeakerUid.toString()} className="spotlight">
-                <VideoTrackView isSpeaking={true} username={currentSpeakerUid} key={currentSpeakerUid} track={spotlight.videoTrack} />
+                <VideoTrackView isSpeaking={true} key={String(currentSpeakerUid)} userData={spotlight} />
             </div> : <></>
         }
     </div>
@@ -58,10 +57,11 @@ const SpotlightView = ({ uidPlayerMap, currentSpeakerUid }: { uidPlayerMap: IUid
 }
 
 const GridView = ({ uidPlayerMap, currentSpeakerUid }: { uidPlayerMap: IUidPlayerMap, currentSpeakerUid: Number }) => {
+
     return <>
         {uidPlayerMap.map((video, index) => (
             <div key={index} className="grid-video">
-                <VideoTrackView isSpeaking={currentSpeakerUid == video.uid} username={video.uid} key={index} track={video.videoTrack} />
+                <VideoTrackView isSpeaking={currentSpeakerUid == video.uid} key={index} userData={video} />
             </div>
         ))}
     </>

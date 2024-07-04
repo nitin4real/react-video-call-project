@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ENPOINTS } from "../constants/apiEndpoints";
 
 interface StringMap {
     [key: string]: string;
@@ -6,11 +7,13 @@ interface StringMap {
 
 class UserDataStore {
     uidMap: StringMap
+    userUid: String
     currentUserName: string
 
     constructor() {
         this.uidMap = {}
         this.currentUserName = ""
+        this.userUid = ""
     }
 
     setCurrentUserName = (name: string) => {
@@ -22,11 +25,12 @@ class UserDataStore {
     }
 
     registerUser = async (uid: String) => {
+        this.userUid = uid
         if (this.uidMap.uid) {
             return
         }
         try {
-            const response = await axios.get(`https://nitinsingh.in:3012/getUserName`, {
+            const response = await axios.get(`${ENPOINTS.BASE_URL}/getUserName`, {
                 params: {
                     uid
                 },

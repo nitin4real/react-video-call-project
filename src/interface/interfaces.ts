@@ -60,10 +60,12 @@ export interface IVideoConnectionConfig {
     token: string
     uid: UID
 }
+
 export interface IUidPlayerMapItem {
     uid: Number
     videoTrack: ICameraVideoTrack | undefined
     audioTrack: IMicrophoneAudioTrack | undefined
+    transcript: string[]
 }
 
 export type IUidPlayerMap = IUidPlayerMapItem[]

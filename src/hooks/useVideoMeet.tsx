@@ -1,72 +1,17 @@
 import AgoraRTC, { IAgoraRTCRemoteUser, IDataChannelConfig } from "agora-rtc-react";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Socket, io } from "socket.io-client";
+import { useLocation, useNavigate } from "react-router-dom";
 import { videoController } from "../controllers/videoController";
 import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState } from "../interface/interfaces";
 import { userDataStore } from "../store/UserDataStore";
-
-const socket = io('http://localhost:3013')
-let mediaRecorder: MediaRecorder | null = null;
-
-
-
-
-
-class TranslatorServices {
-    mediaRecorder: MediaRecorder
-    socket: Socket
-    constructor(socketEndPoint: string, stream: MediaStream) {
-        this.mediaRecorder = new MediaRecorder(stream)
-        this.socket = io(socketEndPoint)
-    }
-    
-}
-
-const TmpAsync = async () => {
-    new TranslatorServices(
-        'http://localhost:3013',
-        await navigator.mediaDevices.getUserMedia({ audio: true })
-    )
-}
-
-
-TmpAsync()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import { TmpAsync } from "../services/translationServices";
 
 export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
     const [currentSpeakerUid, setCurrentSpeakerUid] = useState<Number>(Number(config.uid));
     const [uidPlayerMap, setUidPlayerMap] = useState<IUidPlayerMapItem[]>([]);
     const navigate = useNavigate();
+    const location = useLocation()
 
     const pushInUidPlayerMap = (uid: Number) => {
         setUidPlayerMap((currentMap) => {
@@ -75,7 +20,8 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 {
                     uid,
                     videoTrack: undefined,
-                    audioTrack: undefined
+                    audioTrack: undefined,
+                    transcript: []
                 }
             ];
         });
@@ -94,9 +40,8 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             return currentMap.map((singleMapping) => {
                 if (singleMapping.uid == uid) {
                     return {
-                        uid,
-                        videoTrack,
-                        audioTrack: singleMapping.audioTrack
+                        ...singleMapping,
+                        videoTrack
                     };
                 } else return singleMapping;
             });
@@ -109,9 +54,8 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 if (singleMapping.uid == uid) {
                     singleMapping?.videoTrack?.close();
                     return {
-                        uid,
+                        ...singleMapping,
                         videoTrack: undefined,
-                        audioTrack: singleMapping.audioTrack
                     };
                 } else return singleMapping;
             });
@@ -123,8 +67,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             return currentMap.map((singleMapping) => {
                 if (singleMapping.uid == uid) {
                     return {
-                        uid,
-                        videoTrack: singleMapping.videoTrack,
+                        ...singleMapping,
                         audioTrack
                     };
                 } else return singleMapping;
@@ -139,8 +82,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                     singleMapping?.audioTrack?.close();
 
                     return {
-                        uid,
-                        videoTrack: singleMapping.videoTrack,
+                        ...singleMapping,
                         audioTrack: undefined
                     };
                 } else return singleMapping;
@@ -193,11 +135,29 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         setVideoSetupState(status);
     };
 
+    const onTranslationRecived = (uid: string, transcriptText: string) => {
+        setUidPlayerMap((uidPlayerMap) => {
+            const speakerNodeIndex = uidPlayerMap.findIndex((user) => {
+                return String(user.uid) === String(uid)
+            })
+            if (speakerNodeIndex !== -1) {
+                uidPlayerMap[speakerNodeIndex].transcript.push(transcriptText)
+                return [...uidPlayerMap]
+            }
+            return uidPlayerMap
+        })
+    }
+
     useEffect(() => {
         if (videoSetupState === 'loading')
             videoController.setupVideoWithToken(config, listenersRef.current, onCompleteCallback);
         else if (videoSetupState === 'success') {
+            const userUid = userDataStore.userUid
+            const pathValues = location?.pathname?.split('/')
+            const languageCode = pathValues[pathValues.length - 1]
             pushInUidPlayerMap(Number(config?.uid));
+            if (languageCode !== '')
+                TmpAsync(userUid.toString(), languageCode, onTranslationRecived)
             setVideoStatus(true);
             setAudioStatus(true);
         }
@@ -236,59 +196,9 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         }
     };
 
-    const [recording, setRecording] = useState(true);
-    const [transcript, setTranscript] = useState('');
-    useEffect(() => {
-
-        let audioChunks: BlobPart[] = [];
-        const handleData = (e: any) => {
-            audioChunks.push(e.data);
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            const reader = new FileReader();
-            reader.onload = () => {
-                const result = reader.result as string
-                const audioBase64 = result.split(',')[1];
-                socket.emit('audioStream', audioBase64);
-            };
-            reader.readAsDataURL(audioBlob);
-            audioChunks = [];
-        };
-        console.log('rama rama in the condition to check mediarecorderd', mediaRecorder)
-        if (!recording) {
-            console.log('rama rama starting');
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(stream => {
-                    mediaRecorder = new MediaRecorder(stream);
-                    mediaRecorder.start(1000);
-                    mediaRecorder.addEventListener('dataavailable', handleData);
-                    mediaRecorder.addEventListener('stop', handleData)
-                });
-        } else if (mediaRecorder) {
-            console.log('rama rama stoping');
-            (mediaRecorder as MediaRecorder).stop();
-        }
-
-        return () => {
-            if (mediaRecorder) {
-                mediaRecorder.removeEventListener('dataavailable', handleData);
-            }
-        };
-    }, [recording]);
-
-    useEffect(() => {
-        socket.on('transcription', (data) => {
-            // setTranscript(prev => `${prev} ${data}`);
-        });
-
-        return () => {
-            socket.off('transcription');
-        };
-    }, []);
-
 
     const setMeetStatus = (mediaType: IMediaType, status: boolean) => {
         if (mediaType === 'audio') {
-            setRecording(status)
             setAudioStatus(status);
         } else if (mediaType === 'video') {
             setVideoStatus(status);
