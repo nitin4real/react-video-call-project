@@ -379,3 +379,13 @@ select:focus {
 option:hover {
   background-color: #4caf50;
 }
+
+.transcript-subtitle {
+  font-family: Arial, sans-serif; /* Choose a clean, readable font */
+  font-size: 16px; /* Adjust font size as needed */
+  color: white; /* Text color */
+  background-color: rgba(0, 0, 0, 0.3); 
+  margin-top: 3px;
+  padding: 5px 15px; 
+  border-radius: 5px; 
+}

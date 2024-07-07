@@ -12,7 +12,8 @@ export const VideoTrackView = ({ userData, isSpeaking }: VideoTrackProps) => {
     const videoRef = useRef(null);
     const username = userData.uid
     const track = userData.videoTrack
-    const latestWords = userData.transcript.at(-1)
+    const latestWords1 = userData.transcript.at(-1)
+    // const latestWords0 = userData.transcript.at(-2)
     const isVideoDisabled = !track
     const fullUserName = userDataStore.getUserName(String(username))
 
@@ -35,7 +36,8 @@ export const VideoTrackView = ({ userData, isSpeaking }: VideoTrackProps) => {
             :
             <video style={{ maxHeight: 500, objectFit: 'contain' }} ref={videoRef} autoPlay />
         }
-        <p>{latestWords}</p>
+        {/* {latestWords0 ? <div className="transcript-subtitle">{latestWords0}</div> : <></>} */}
+        {latestWords1 ? <div className="transcript-subtitle">{latestWords1}</div> : <></>}
         <p>{fullUserName}</p>
     </div>;
 };
