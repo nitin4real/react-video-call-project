@@ -1,53 +1,82 @@
 import { Socket, io as createSocketConnection } from "socket.io-client";
-import { ENPOINTS } from "../constants/apiEndpoints";
 
 class TranslatorServices {
-    userUid: string
-    mediaRecorder: MediaRecorder;
-    socket: Socket;
+    mediaRecorder: MediaRecorder | undefined;
+    socket: Socket | undefined;
     audioPacket: string;
     languageCode: string
+    audioStream: MediaStream | undefined
+    isServiceActive: boolean
 
-    constructor(socketEndPoint: string, stream: MediaStream, userUid: string, languageCode: string, onTranscript: (uid: string, transcript: string) => void) {
-        this.userUid = userUid
+    constructor() {
+        this.audioPacket = ''
+        this.languageCode = ''
+        this.isServiceActive = false
+    }
+
+    initTranslationServices = (socketEndPoint: string, userUid: string, channelName: string, languageCode: string, onTranscript: (uid: string, transcript: string) => void) => {
         this.languageCode = languageCode
-        this.mediaRecorder = new MediaRecorder(stream)
         this.socket = createSocketConnection(socketEndPoint, {
             query: {
                 languageCode,
-                userUid
+                userUid,
+                channelName
             }
         })
-        this.audioPacket = ''
-        this.mediaRecorder.addEventListener('stop', this.restartRecording)
-        this.startRecording()
         this.setTranslationListeners(onTranscript)
     }
 
+    stopTranslationService = () => {
+        if (this.isServiceActive === false) return
+        this.isServiceActive = false
+        this.mute()
+        this.socket?.disconnect()
+    }
+
+    mute = () => {
+        this.isServiceActive = false
+        this.mediaRecorder?.stop()
+        let tracks = this.audioStream?.getTracks();
+        tracks?.forEach((track) => {
+            track.stop();
+        });
+    }
+
+    unmute = async () => {
+        const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        this.audioStream = audioStream
+        this.mediaRecorder = new MediaRecorder(audioStream)
+        this.mediaRecorder.addEventListener('stop', this.restartRecording)
+        this.isServiceActive = true
+        this.startRecording()
+    }
+
     startRecording = () => {
-        if (this.mediaRecorder.state !== 'recording') {
-            this.mediaRecorder.addEventListener('dataavailable', this.onHandleAudioData)
-            this.mediaRecorder.start(4000)
+        if (this.isServiceActive === false) return
+        if (this.mediaRecorder?.state !== 'recording') {
+            this.mediaRecorder?.addEventListener('dataavailable', this.onHandleAudioData)
+            this.mediaRecorder?.start(4000)
         } else {
-            this.mediaRecorder.stop()
+            this.mediaRecorder?.stop()
         }
     }
 
     restartRecording = () => {
+        if (this.isServiceActive === false) return
         this.startRecording()
     }
 
     setTranslationListeners = (onTranscript: (uid: string, transcript: string) => void) => {
-        this.socket.on('translationData', (translatedData: string, speakerId: string) => {
-            //it may be possible that translatedData may only be available in string in that case parse the json
+        this.socket?.on('translationData', (translatedData: string, speakerId: string) => {
             onTranscript(speakerId, translatedData)
         })
     }
 
 
     onHandleAudioData = (audioRecordEventEvent: any) => {
-        this.mediaRecorder.removeEventListener('dataavailable', this.onHandleAudioData)
-        this.mediaRecorder.stop()
+        if (this.isServiceActive === false) return
+        this.mediaRecorder?.removeEventListener('dataavailable', this.onHandleAudioData)
+        this.mediaRecorder?.stop()
         this.sendAudioChunk(audioRecordEventEvent.data)
     }
 
@@ -58,22 +87,14 @@ class TranslatorServices {
         reader.onload = () => {
             const result = reader.result as string
             const audioBase64 = result.split(',')[1];
-            this.socket.emit('audioStream', audioBase64);
+            this.socket?.emit('audioStream', audioBase64);
         };
         reader.readAsDataURL(audioBlob);
     }
 }
 
-let masterStream: MediaStream
-export const TmpAsync = async (userUid: string, languageCode: string, onTranscript: (uid: string, transcription: string) => void) => {
-    masterStream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    new TranslatorServices(
-        ENPOINTS.BASE_URL,
-        masterStream,
-        userUid,
-        languageCode,
-        onTranscript
-    )
+// let masterStream: MediaStream
+export const TmpAsync = async (userUid: string, channelName: string, languageCode: string, onTranscript: (uid: string, transcription: string) => void) => {
+    // masterStream = await navigator.mediaDevices.getUserMedia({ audio: true })
 }
-
-// at any time this socket will keep on reciving the translated text from someone // it should contain the following type
+export const translator = new TranslatorServices()

@@ -1,10 +1,11 @@
 import AgoraRTC, { IAgoraRTCRemoteUser, IDataChannelConfig } from "agora-rtc-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { ENPOINTS } from "../constants/apiEndpoints";
 import { videoController } from "../controllers/videoController";
 import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState } from "../interface/interfaces";
+import { translator } from "../services/translationServices";
 import { userDataStore } from "../store/UserDataStore";
-import { TmpAsync } from "../services/translationServices";
 
 export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
@@ -93,6 +94,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const handleDisconnectClick = () => {
         setVideoStatus(false);
         setAudioStatus(false);
+        translator.stopTranslationService()
         onDisconnect();
         navigate(-1);
     };
@@ -152,12 +154,19 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         if (videoSetupState === 'loading')
             videoController.setupVideoWithToken(config, listenersRef.current, onCompleteCallback);
         else if (videoSetupState === 'success') {
-            const userUid = userDataStore.userUid
+            const userUid = config.uid
             const pathValues = location?.pathname?.split('/')
             const languageCode = pathValues[pathValues.length - 1]
+            const channelName = pathValues[pathValues.length - 2]
             pushInUidPlayerMap(Number(config?.uid));
             if (languageCode !== '')
-                TmpAsync(userUid.toString(), languageCode, onTranslationRecived)
+                translator.initTranslationServices(
+                    ENPOINTS.BASE_URL,
+                    userUid.toString(),
+                    channelName,
+                    languageCode,
+                    onTranslationRecived
+                )
             setVideoStatus(true);
             setAudioStatus(true);
         }
@@ -174,7 +183,9 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                     videoController.setAudioStatus(true, track);
                 }
             ).catch(e => console.log('errrr'));
+            translator.unmute()
         } else {
+            translator.mute()
             removeAudioTrackFromMap(Number(config.uid));
         }
     };

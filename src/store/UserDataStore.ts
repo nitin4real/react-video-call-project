@@ -7,13 +7,11 @@ interface StringMap {
 
 class UserDataStore {
     uidMap: StringMap
-    userUid: String
     currentUserName: string
 
     constructor() {
         this.uidMap = {}
         this.currentUserName = ""
-        this.userUid = ""
     }
 
     setCurrentUserName = (name: string) => {
@@ -25,7 +23,6 @@ class UserDataStore {
     }
 
     registerUser = async (uid: String) => {
-        this.userUid = uid
         if (this.uidMap.uid) {
             return
         }
