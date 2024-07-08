@@ -1,16 +1,19 @@
 import AgoraRTC, { IAgoraRTCRemoteUser, IDataChannelConfig } from "agora-rtc-react";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ENPOINTS } from "../constants/apiEndpoints";
 import { videoController } from "../controllers/videoController";
-import { IMediaType, IVideoConnectionConfig, IVideoMeetListeners, SetupState } from "../interface/interfaces";
-import { IUidPlayerMapItem } from "../interface/interfaces";
+import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState, ITranscript } from "../interface/interfaces";
+import { translator } from "../services/translationServices";
 import { userDataStore } from "../store/UserDataStore";
 
 export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
     const [currentSpeakerUid, setCurrentSpeakerUid] = useState<Number>(Number(config.uid));
     const [uidPlayerMap, setUidPlayerMap] = useState<IUidPlayerMapItem[]>([]);
+    const [transcript, setTranscript] = useState<ITranscript[]>([])
     const navigate = useNavigate();
+    const location = useLocation()
 
     const pushInUidPlayerMap = (uid: Number) => {
         setUidPlayerMap((currentMap) => {
@@ -19,7 +22,8 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 {
                     uid,
                     videoTrack: undefined,
-                    audioTrack: undefined
+                    audioTrack: undefined,
+                    transcript: []
                 }
             ];
         });
@@ -38,9 +42,8 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             return currentMap.map((singleMapping) => {
                 if (singleMapping.uid == uid) {
                     return {
-                        uid,
-                        videoTrack,
-                        audioTrack: singleMapping.audioTrack
+                        ...singleMapping,
+                        videoTrack
                     };
                 } else return singleMapping;
             });
@@ -53,9 +56,8 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 if (singleMapping.uid == uid) {
                     singleMapping?.videoTrack?.close();
                     return {
-                        uid,
+                        ...singleMapping,
                         videoTrack: undefined,
-                        audioTrack: singleMapping.audioTrack
                     };
                 } else return singleMapping;
             });
@@ -67,8 +69,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             return currentMap.map((singleMapping) => {
                 if (singleMapping.uid == uid) {
                     return {
-                        uid,
-                        videoTrack: singleMapping.videoTrack,
+                        ...singleMapping,
                         audioTrack
                     };
                 } else return singleMapping;
@@ -83,8 +84,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                     singleMapping?.audioTrack?.close();
 
                     return {
-                        uid,
-                        videoTrack: singleMapping.videoTrack,
+                        ...singleMapping,
                         audioTrack: undefined
                     };
                 } else return singleMapping;
@@ -95,6 +95,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const handleDisconnectClick = () => {
         setVideoStatus(false);
         setAudioStatus(false);
+        translator.stopTranslationService()
         onDisconnect();
         navigate(-1);
     };
@@ -137,11 +138,46 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         setVideoSetupState(status);
     };
 
+    const onTranslationRecived = (uid: string, transcriptText: string) => {
+        setUidPlayerMap((uidPlayerMap) => {
+            const speakerNodeIndex = uidPlayerMap.findIndex((user) => {
+                return String(user.uid) === String(uid)
+            })
+            if (speakerNodeIndex !== -1 && transcriptText.trim()) {
+                setTranscript((transcript) => {
+                    return [
+                        ...transcript,
+                        {
+                            uid: uid,
+                            text: transcriptText,
+                            timestamp: new Date()
+                        }
+                    ]
+                })
+                uidPlayerMap[speakerNodeIndex].transcript.push(transcriptText)
+                return [...uidPlayerMap]
+            }
+            return uidPlayerMap
+        })
+    }
+
     useEffect(() => {
         if (videoSetupState === 'loading')
             videoController.setupVideoWithToken(config, listenersRef.current, onCompleteCallback);
         else if (videoSetupState === 'success') {
+            const userUid = config.uid
+            const pathValues = location?.pathname?.split('/')
+            const languageCode = pathValues[pathValues.length - 1]
+            const channelName = pathValues[pathValues.length - 2]
             pushInUidPlayerMap(Number(config?.uid));
+            if (languageCode !== '')
+                translator.initTranslationServices(
+                    ENPOINTS.BASE_URL,
+                    userUid.toString(),
+                    channelName,
+                    languageCode,
+                    onTranslationRecived
+                )
             setVideoStatus(true);
             setAudioStatus(true);
         }
@@ -158,7 +194,9 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                     videoController.setAudioStatus(true, track);
                 }
             ).catch(e => console.log('errrr'));
+            translator.unmute()
         } else {
+            translator.mute()
             removeAudioTrackFromMap(Number(config.uid));
         }
     };
@@ -180,6 +218,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         }
     };
 
+
     const setMeetStatus = (mediaType: IMediaType, status: boolean) => {
         if (mediaType === 'audio') {
             setAudioStatus(status);
@@ -189,6 +228,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     };
 
     return {
+        transcript,
         videoSetupState,
         setMeetStatus,
         currentSpeakerUid,

@@ -42,7 +42,7 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
 
 
     return <div className="control-buttons">
-        <img height={30} width={30} src={micImage} alt="Audio" onClick={handleAudioClick}/>
+        <img height={30} width={30} src={micImage} alt="Audio" onClick={handleAudioClick} />
         <img height={30} width={30} src={camaraImage} alt="Video" onClick={handleVideoClick} />
         <button onClick={handleStateClick}>Change View to {mode === 'grid' ? 'spotlight' : 'grid'}</button>
         <img height={30} width={30} src={disconnectImg} alt="Disconnect" onClick={handleDisconnectClick} />

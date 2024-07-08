@@ -352,3 +352,59 @@ video {
   margin: auto;
   /* Center the image if it's smaller than the container */
 }
+
+.dropdown-container {
+  margin: 20px;
+  font-family: Arial, sans-serif;
+}
+
+label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+select {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+select:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+
+option:hover {
+  background-color: #4caf50;
+}
+
+.transcript-subtitle {
+  font-family: Arial, sans-serif;
+  /* Choose a clean, readable font */
+  font-size: 16px;
+  /* Adjust font size as needed */
+  color: white;
+  /* Text color */
+  background-color: rgba(0, 0, 0, 0.3);
+  margin-top: 3px;
+  padding: 5px 15px;
+  border-radius: 5px;
+}
+
+.transcript-container {
+  height: 20%;
+  overflow-x: auto;
+  border: 3px solid #4caf50;
+}
+
+.transcript-message {
+  font-size: medium;
+  padding: 3px;
+  font-family: 'Arial', sans-serif;
+}
+.transcript-message-user {
+  font-weight: bold;
+  padding: 10px 10px;
+}

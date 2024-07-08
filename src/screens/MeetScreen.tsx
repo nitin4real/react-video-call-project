@@ -1,20 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { tokenGenerator } from "../utils/AgoraTokenGenerator";
 import { ChatComponent } from "../components/ChatComponent";
 import { ErrorComponent } from "../components/ErrorComponent";
 import Loader from "../components/Loader";
 import { VideoMeet } from "../components/VideoMeetComponent";
-import { IChatConnectionConfig, ITokenResponse, IVideoConnectionConfig, SetupState } from "../interface/interfaces";
-import { videoController } from "../controllers/videoController";
 import { chatController } from "../controllers/chatController";
+import { videoController } from "../controllers/videoController";
+import { IChatConnectionConfig, ITokenResponse, IVideoConnectionConfig, SetupState } from "../interface/interfaces";
 import { userDataStore } from "../store/UserDataStore";
+import { tokenGenerator } from "../utils/AgoraTokenGenerator";
 
 const useMeet = () => {
     const [tokensRetrivedStatus, setTokenStatus] = useState<SetupState>('loading');
     const location = useLocation()
     const pathValues = location.pathname.split('/')
-    const channelName = pathValues[pathValues.length - 1]
+    const channelName = pathValues[pathValues.length - 2]
     let username: string = String(localStorage.getItem('username'))
 
     const disconnectAllConnections = () => {

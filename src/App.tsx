@@ -9,7 +9,7 @@ function App() {
       <Routes>
         <Route path="/" element={<JoinMeetComponent />} />
         <Route path="/meet" element={<MeetScreen />} />
-        <Route path="/meet/:channelname/" element={<MeetScreen />} />
+        <Route path="/meet/:channelname/:language" element={<MeetScreen />} />
       </Routes>
     </BrowserRouter>
   )

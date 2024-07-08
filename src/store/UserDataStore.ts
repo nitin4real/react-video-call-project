@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ENPOINTS } from "../constants/apiEndpoints";
 
 interface StringMap {
     [key: string]: string;
@@ -26,7 +27,7 @@ class UserDataStore {
             return
         }
         try {
-            const response = await axios.get(`https://nitinsingh.in:3012/getUserName`, {
+            const response = await axios.get(`${ENPOINTS.BASE_URL}/getUserName`, {
                 params: {
                     uid
                 },

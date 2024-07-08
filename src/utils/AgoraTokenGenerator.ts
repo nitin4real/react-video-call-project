@@ -1,6 +1,7 @@
 import axios from "axios";
-import { SetupState } from "../interface/interfaces";
-import { ITokenResponse } from "../interface/interfaces";
+import { ENPOINTS } from "../constants/apiEndpoints";
+import { ITokenResponse, SetupState } from "../interface/interfaces";
+
 class AgoraTokenHelper {
     isOccupied: boolean = false
     GenerateTokenForUserID = async (
@@ -10,7 +11,7 @@ class AgoraTokenHelper {
         if (this.isOccupied) return
         this.isOccupied = true
         try {
-            const response = await axios.get(`https://nitinsingh.in:3012/getToken`, {
+            const response = await axios.get(`${ENPOINTS.BASE_URL}/getToken`, {
                 params: {
                     userId,
                     channelName
@@ -36,4 +37,4 @@ class AgoraTokenHelper {
 }
 
 const tokenGenerator = new AgoraTokenHelper()
-export { tokenGenerator }
+export { tokenGenerator };
