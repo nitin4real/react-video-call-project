@@ -381,11 +381,30 @@ option:hover {
 }
 
 .transcript-subtitle {
-  font-family: Arial, sans-serif; /* Choose a clean, readable font */
-  font-size: 16px; /* Adjust font size as needed */
-  color: white; /* Text color */
-  background-color: rgba(0, 0, 0, 0.3); 
+  font-family: Arial, sans-serif;
+  /* Choose a clean, readable font */
+  font-size: 16px;
+  /* Adjust font size as needed */
+  color: white;
+  /* Text color */
+  background-color: rgba(0, 0, 0, 0.3);
   margin-top: 3px;
-  padding: 5px 15px; 
-  border-radius: 5px; 
+  padding: 5px 15px;
+  border-radius: 5px;
+}
+
+.transcript-container {
+  height: 20%;
+  overflow-x: auto;
+  border: 3px solid #4caf50;
+}
+
+.transcript-message {
+  font-size: medium;
+  padding: 3px;
+  font-family: 'Arial', sans-serif;
+}
+.transcript-message-user {
+  font-weight: bold;
+  padding: 10px 10px;
 }

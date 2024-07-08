@@ -69,3 +69,9 @@ export interface IUidPlayerMapItem {
 }
 
 export type IUidPlayerMap = IUidPlayerMapItem[]
+
+export type ITranscript = {
+    uid: string
+    text: string
+    timestamp: Date
+}

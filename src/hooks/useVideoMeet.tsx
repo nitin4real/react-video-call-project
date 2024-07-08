@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ENPOINTS } from "../constants/apiEndpoints";
 import { videoController } from "../controllers/videoController";
-import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState } from "../interface/interfaces";
+import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState, ITranscript } from "../interface/interfaces";
 import { translator } from "../services/translationServices";
 import { userDataStore } from "../store/UserDataStore";
 
@@ -11,6 +11,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
     const [currentSpeakerUid, setCurrentSpeakerUid] = useState<Number>(Number(config.uid));
     const [uidPlayerMap, setUidPlayerMap] = useState<IUidPlayerMapItem[]>([]);
+    const [transcript, setTranscript] = useState<ITranscript[]>([])
     const navigate = useNavigate();
     const location = useLocation()
 
@@ -142,7 +143,17 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             const speakerNodeIndex = uidPlayerMap.findIndex((user) => {
                 return String(user.uid) === String(uid)
             })
-            if (speakerNodeIndex !== -1) {
+            if (speakerNodeIndex !== -1 && transcriptText.trim()) {
+                setTranscript((transcript) => {
+                    return [
+                        ...transcript,
+                        {
+                            uid: uid,
+                            text: transcriptText,
+                            timestamp: new Date()
+                        }
+                    ]
+                })
                 uidPlayerMap[speakerNodeIndex].transcript.push(transcriptText)
                 return [...uidPlayerMap]
             }
@@ -217,6 +228,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     };
 
     return {
+        transcript,
         videoSetupState,
         setMeetStatus,
         currentSpeakerUid,

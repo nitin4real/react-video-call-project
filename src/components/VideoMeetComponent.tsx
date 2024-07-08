@@ -5,17 +5,19 @@ import { IUidPlayerMap, IVideoConnectionConfig } from "../interface/interfaces"
 import { MeetControls } from "./MeetControls"
 import { VideoTrackView } from "./VideoTrackView"
 import { useVideoMeet } from "../hooks/useVideoMeet"
+import { userDataStore } from "../store/UserDataStore"
 
 export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionConfig, onDisconnect: () => void }) => {
-    const { videoSetupState, setMeetStatus, currentSpeakerUid, uidPlayerMap, handleDisconnectClick } = useVideoMeet(config, onDisconnect)
+    const { videoSetupState, setMeetStatus, currentSpeakerUid, uidPlayerMap, handleDisconnectClick, transcript } = useVideoMeet(config, onDisconnect)
     const [mode, setMode] = useState<'spotlight' | 'grid'>('grid');
-
+    const [showTranscript, setShowTranscript] = useState(false)
     if (videoSetupState === 'loading') {
         return <Loader />
     } else if (videoSetupState === 'error') {
         return <ErrorComponent message="Error In Loading Video Meet" />
     }
     const containerStyle = mode === 'grid' ? 'video-container-grid' : 'video-container'
+    const reversedMessages = [...transcript].reverse()
     return (
         <div className="video-meet">
             <MeetControls setMeetStatus={setMeetStatus} mode={mode} setMode={setMode} handleDisconnectClick={handleDisconnectClick} />
@@ -24,6 +26,23 @@ export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionCo
                     ? <SpotlightView uidPlayerMap={uidPlayerMap} currentSpeakerUid={currentSpeakerUid} />
                     : <GridView uidPlayerMap={uidPlayerMap} currentSpeakerUid={currentSpeakerUid} />}
             </div>
+            <button onClick={() => setShowTranscript(st => !st)}>{showTranscript ? 'Hide' : 'Show'} Transcript</button>
+
+            {showTranscript ? <div className="transcript-container">
+                {reversedMessages.map((message) => {
+                    const fullUserName = userDataStore.getUserName(String(message.uid))
+                    return <div key={`${message.uid}-${message.timestamp}`} className="transcript-message">
+                        <span className="transcript-message-user">
+                            {`${fullUserName}:`}
+                        </span>
+                        <span className="transcript-message-text">
+                            {message.text}
+                        </span>
+                    </div>
+                })}
+            </div> :
+                <></>
+            }
         </div>
     );
 };
