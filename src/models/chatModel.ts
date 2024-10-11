@@ -1,4 +1,4 @@
-import AgoraRTM, { RTMClient } from 'agora-rtm-sdk'
+import AgoraRTM, { RTMClient, RTMConfig } from 'agora-rtm-sdk'
 import { IChatConnectionConfig, IChatMeetListeners } from '../interface/interfaces'
 
 export class ChatModel {
@@ -14,7 +14,7 @@ export class ChatModel {
             {
                 token: config.token,
                 logLevel: 'none',
-            }
+            } as RTMConfig
         )
     }
 

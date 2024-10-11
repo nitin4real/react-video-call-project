@@ -4,8 +4,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ENPOINTS } from "../constants/apiEndpoints";
 import { videoController } from "../controllers/videoController";
 import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState, ITranscript } from "../interface/interfaces";
-import { translator } from "../services/translationServices";
 import { userDataStore } from "../store/UserDataStore";
+import { voice2voiceTranslator } from "../services/voice2VoiceTranslationService";
 
 export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
@@ -95,7 +95,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const handleDisconnectClick = () => {
         setVideoStatus(false);
         setAudioStatus(false);
-        translator.stopTranslationService()
+        voice2voiceTranslator.stopTranslationService()
         onDisconnect();
         navigate(-1);
     };
@@ -113,7 +113,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             if (mediaType === 'video') {
                 addVideoTrackToMap(Number(user?.uid), user?.videoTrack);
             } else if (mediaType === 'audio') {
-                user?.audioTrack?.play();
+                // user?.audioTrack?.play();
                 addAudioTrackToMap(Number(user?.uid), user?.audioTrack);
             }
         },
@@ -171,7 +171,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             const channelName = pathValues[pathValues.length - 2]
             pushInUidPlayerMap(Number(config?.uid));
             if (languageCode !== '')
-                translator.initTranslationServices(
+                voice2voiceTranslator.initTranslationServices(
                     ENPOINTS.BASE_URL,
                     userUid.toString(),
                     channelName,
@@ -188,15 +188,15 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
 
     const setAudioStatus = (state: boolean) => {
         if (state === true) {
-            AgoraRTC.createMicrophoneAudioTrack().then(
-                (track) => {
-                    addAudioTrackToMap(Number(config.uid), track);
-                    videoController.setAudioStatus(true, track);
-                }
-            ).catch(e => console.log('errrr'));
-            translator.unmute()
+            // AgoraRTC.createMicrophoneAudioTrack().then(
+            //     (track) => {
+            //         addAudioTrackToMap(Number(config.uid), track);
+            //         videoController.setAudioStatus(true, track);
+            //     }
+            // ).catch(e => console.log('errrr'));
+            voice2voiceTranslator.unmute()
         } else {
-            translator.mute()
+            voice2voiceTranslator.mute()
             removeAudioTrackFromMap(Number(config.uid));
         }
     };
