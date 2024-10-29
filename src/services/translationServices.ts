@@ -94,7 +94,7 @@ class TranslatorServices {
 }
 
 // let masterStream: MediaStream
-export const TmpAsync = async (userUid: string, channelName: string, languageCode: string, onTranscript: (uid: string, transcription: string) => void) => {
-    // masterStream = await navigator.mediaDevices.getUserMedia({ audio: true })
-}
-export const translator = new TranslatorServices()
+// export const TmpAsync = async (userUid: string, channelName: string, languageCode: string, onTranscript: (uid: string, transcription: string) => void) => {
+//     // masterStream = await navigator.mediaDevices.getUserMedia({ audio: true })
+// }
+// export const translator = new TranslatorServices()

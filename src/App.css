@@ -16,55 +16,6 @@
   border-bottom: 1px solid #ccc;
 }
 
-.input-container {
-  display: flex;
-  margin-top: 16px;
-}
-
-.input-container input {
-  flex-grow: 1;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-right: 8px;
-}
-
-.input-container button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  background-color: #4caf50;
-  color: white;
-  cursor: pointer;
-}
-
-.input-container button:hover {
-  background-color: #45a049;
-}
-
-.login-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-  margin-top: 100px;
-}
-
-.input-container {
-  margin-bottom: 20px;
-}
-
-.input-container input {
-  padding: 8px;
-  width: 100%;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
 
 .avatar-container {
   display: flex;
@@ -83,20 +34,20 @@
 }
 
 .avatar.selected {
-  border-color: #4caf50;
+  border-color: #099dfd;
 }
 
 button {
   padding: 10px 20px;
   border: none;
   border-radius: 4px;
-  background-color: #4caf50;
+  background-color: #099dfd;
   color: white;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: #1171b1;
 }
 
 .loader-container {
@@ -110,7 +61,7 @@ button:hover {
 .loader {
   border: 16px solid #f3f3f3;
   /* Light grey */
-  border-top: 16px solid #4caf50;
+  border-top: 16px solid #099dfd;
   /* Green */
   border-radius: 50%;
   width: 120px;
@@ -203,6 +154,17 @@ video {
   overflow: hidden;
 }
 
+.video-pane {
+  width: 100%;
+  background-color: #f0f0f0;
+  /* Light gray background for visibility */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+
 .left-pane {
   width: 70%;
   background-color: #f0f0f0;
@@ -239,7 +201,7 @@ video {
 
 .chat-item.current-user {
   align-self: flex-end;
-  background-color: #e1ffc7;
+  background-color: #8ddbff;
   align-items: flex-end;
   margin-left: auto;
 }
@@ -262,12 +224,6 @@ video {
 
 
 
-.video-meet {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-}
 
 .control-buttons {
   display: flex;
@@ -308,11 +264,6 @@ video {
   max-width: 200px;
 }
 
-
-.video-container.grid .grid-video {
-  flex: 1 0 35%;
-  margin: 5px;
-}
 
 .mode-switch {
   display: flex;
@@ -372,12 +323,12 @@ select {
 
 select:focus {
   outline: none;
-  border-color: #4caf50;
+  border-color: #099dfd;
 }
 
 
 option:hover {
-  background-color: #4caf50;
+  background-color: #099dfd;
 }
 
 .transcript-subtitle {
@@ -396,7 +347,7 @@ option:hover {
 .transcript-container {
   height: 20%;
   overflow-x: auto;
-  border: 3px solid #4caf50;
+  border: 3px solid #099dfd;
 }
 
 .transcript-message {
@@ -404,7 +355,116 @@ option:hover {
   padding: 3px;
   font-family: 'Arial', sans-serif;
 }
+
 .transcript-message-user {
   font-weight: bold;
   padding: 10px 10px;
 }
+
+.agora-logo {
+  margin: 50px;
+  width: 80%;
+}
+
+.login-input-container {
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  justify-content: center;
+  margin: 0 auto;
+  padding: 40px;
+  border-radius: 8px;
+}
+
+.login-button {
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  border: none;
+  width: auto;
+  border-radius: 30px;
+  background-color: #099dfd;
+  color: white;
+  cursor: pointer;
+}
+
+input {
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  width: 40%;
+  margin: 30px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.language-dropdown {
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  border-radius: 30px;
+  border: 1px solid #ccc;
+}
+
+.login-screen {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+  background-color: #f9f9f9;
+  padding: 0 80px;
+  margin: 100px;
+  border-radius: 50px;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  justify-content: center;
+}
+
+.demo-header {
+  display: flex;
+  font-size: 2.5rem;
+  width: 70%;
+}
+
+.login-background-img {
+  z-index: -1;
+  position: absolute;
+  background-color: #0f6faf;
+  width: 100%;
+  top: 0;
+  bottom: 0;
+}
+
+.transcript-pane {
+  width: 40%;
+  height: 100%;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.video-meet {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+ .grid-video {
+  width: 42%;
+  margin: 2%;
+}
+

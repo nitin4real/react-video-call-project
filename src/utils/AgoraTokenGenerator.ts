@@ -5,7 +5,7 @@ import { ITokenResponse, SetupState } from "../interface/interfaces";
 class AgoraTokenHelper {
     isOccupied: boolean = false
     GenerateTokenForUserID = async (
-        userId: string, channelName: string = '',
+        userId: string, channelName: string = '', language: string = '',
         onComplete: (status: SetupState, response: ITokenResponse) => void
     ) => {
         if (this.isOccupied) return
@@ -14,7 +14,8 @@ class AgoraTokenHelper {
             const response = await axios.get(`${ENPOINTS.BASE_URL}/getToken`, {
                 params: {
                     userId,
-                    channelName
+                    channelName,
+                    language
                 },
             })
             onComplete('success', response.data)

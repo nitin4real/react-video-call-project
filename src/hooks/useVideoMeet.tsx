@@ -4,8 +4,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ENPOINTS } from "../constants/apiEndpoints";
 import { videoController } from "../controllers/videoController";
 import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState, ITranscript } from "../interface/interfaces";
-import { translator } from "../services/translationServices";
 import { userDataStore } from "../store/UserDataStore";
+import { getBotData } from "../utils/botCode";
+// import { voice2voiceTranslator } from "../services/voice2VoiceTranslationService";
 
 export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
@@ -95,25 +96,36 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const handleDisconnectClick = () => {
         setVideoStatus(false);
         setAudioStatus(false);
-        translator.stopTranslationService()
+        // voice2voiceTranslator.stopTranslationService()
         onDisconnect();
         navigate(-1);
     };
 
     const listenersRef = useRef<IVideoMeetListeners>({
         onUserJoined: (user: IAgoraRTCRemoteUser): void => {
+            if (String(user?.uid).length > 4) return;
             userDataStore.registerUser(String(user?.uid))
             pushInUidPlayerMap(Number(user?.uid));
         },
         onUserLeft: (user: IAgoraRTCRemoteUser, reason: string): void => {
             removeUserFromMap(Number(user?.uid));
         },
-        onUserPublished: async (user: IAgoraRTCRemoteUser, mediaType: IMediaType, config?: IDataChannelConfig | undefined) => {
+        onUserPublished: async (user: IAgoraRTCRemoteUser, mediaType: IMediaType, channelConfig?: IDataChannelConfig | undefined) => {
+            if(String(user?.uid).length > 4) {
+                const botData = getBotData(String(user?.uid))
+                if (botData.targetLangName !== config.language || botData.speakerUID === config.uid) {
+                    return
+                }
+            }
             await videoController.subscribeToRemoteUser(user, mediaType);
+            // MARK: Only subscribe to users ignore the bots with 8 digit uid
             if (mediaType === 'video') {
+                if (String(user?.uid).length > 4) return
                 addVideoTrackToMap(Number(user?.uid), user?.videoTrack);
             } else if (mediaType === 'audio') {
+                // do not play audio for all the bots only those who speak your language
                 user?.audioTrack?.play();
+                if (String(user?.uid).length > 4) return
                 addAudioTrackToMap(Number(user?.uid), user?.audioTrack);
             }
         },
@@ -126,13 +138,46 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         },
         onVolumnIndicator: (speakers) => {
             speakers?.forEach(speaker => {
-                console.log(speaker.level, speaker?.level > 100);
+                // console.log(speaker.level, speaker?.level > 100);
                 if (speaker?.uid && speaker?.level > 40) {
-                    setCurrentSpeakerUid(speaker.uid);
+                    if (String(speaker?.uid).length > 4) {
+                        const botData = getBotData(String(speaker?.uid))
+                        // set the master volumn to 20 for 3 seconds
+                        uidPlayerMap.find((item) => item.uid === Number(botData.speakerUID))?.audioTrack?.setVolume(25)
+                        setTimeout(() => {
+                            uidPlayerMap.find((item) => item.uid === Number(botData.speakerUID))?.audioTrack?.setVolume(100)
+                        }, 2000)
+                        setCurrentSpeakerUid(Number(botData.speakerUID));
+                    } else {
+                        setCurrentSpeakerUid(speaker.uid);
+                    }
                 }
             });
+        },
+        onStreamMessage: (uid, payload) => {
+            // convert Uint8Array to string
+            const decoder = new TextDecoder();
+            const str = decoder.decode(payload);
+            console.log(uid, str);
+            const data = str.split('|')
+            const transcriptionDataStr = atob(data[data.length - 1]);
+            const transcriptionData = JSON.parse(transcriptionDataStr);
+            //  2 cases "response.audio_transcript.done" "conversation.item.input_audio_transcription.completed" 
+            console.log(
+                transcriptionData.transcript,
+                uid,
+                transcriptionData.type
+            );
+            const botData = getBotData(String(uid))
+            console.log('botData',botData,config.uid,transcriptionData)
+            if (botData.speakerUID === config.uid && transcriptionData.type === 'conversation.item.input_audio_transcription.completed') {
+                onTranslationRecived(botData.speakerUID, transcriptionData.transcript)
+            } else if (botData.targetLangName === config.language && transcriptionData.type === 'response.audio_transcript.done') {
+                onTranslationRecived(botData.speakerUID, transcriptionData.transcript)
+            }
         }
-    });
+    })
+
 
     const onCompleteCallback = (status: SetupState) => {
         setVideoSetupState(status);
@@ -148,7 +193,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                     return [
                         ...transcript,
                         {
-                            uid: uid,
+                            uid: String(uid),
                             text: transcriptText,
                             timestamp: new Date()
                         }
@@ -170,14 +215,15 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             const languageCode = pathValues[pathValues.length - 1]
             const channelName = pathValues[pathValues.length - 2]
             pushInUidPlayerMap(Number(config?.uid));
-            if (languageCode !== '')
-                translator.initTranslationServices(
-                    ENPOINTS.BASE_URL,
-                    userUid.toString(),
-                    channelName,
-                    languageCode,
-                    onTranslationRecived
-                )
+            if (languageCode !== '') {
+                // voice2voiceTranslator.initTranslationServices(
+                //     ENPOINTS.BASE_URL,
+                //     userUid.toString(),
+                //     channelName,
+                //     languageCode,
+                //     onTranslationRecived
+                // )
+            }
             setVideoStatus(true);
             setAudioStatus(true);
         }
@@ -194,9 +240,9 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                     videoController.setAudioStatus(true, track);
                 }
             ).catch(e => console.log('errrr'));
-            translator.unmute()
+            // voice2voiceTranslator.unmute()
         } else {
-            translator.mute()
+            // voice2voiceTranslator.mute()
             removeAudioTrackFromMap(Number(config.uid));
         }
     };

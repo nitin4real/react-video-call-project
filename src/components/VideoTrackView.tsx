@@ -27,8 +27,7 @@ export const VideoTrackView = ({ userData, isSpeaking }: VideoTrackProps) => {
         };
     }, [track]);
 
-
-    return <div className="video-component" style={{ backgroundColor: isSpeaking ? '#4caf50' : 'white' }}>
+    return <div className="video-component" style={{ backgroundColor: isSpeaking ? '#8ddbff' : 'white' }}>
         {isVideoDisabled
             ? <div className="video-alt-container">
                 <img src={dummyUser} alt={String(username)} />
@@ -38,6 +37,6 @@ export const VideoTrackView = ({ userData, isSpeaking }: VideoTrackProps) => {
         }
         {/* {latestWords0 ? <div className="transcript-subtitle">{latestWords0}</div> : <></>} */}
         {latestWords1 ? <div className="transcript-subtitle">{latestWords1}</div> : <></>}
-        <p>{fullUserName}</p>
+        <p>{fullUserName} - {String(username)}</p>
     </div>;
 };

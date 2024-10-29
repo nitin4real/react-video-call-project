@@ -51,14 +51,16 @@ export interface IVideoMeetListeners {
     onUserPublished: (user: IAgoraRTCRemoteUser, mediaType: IMediaType, config?: IDataChannelConfig | undefined) => void
     onUserUnpublished: (user: IAgoraRTCRemoteUser, mediaType: IMediaType, config?: IDataChannelConfig | undefined) => void
     onVolumnIndicator: (speakers: ISpeaker[]) => void
-
+    onStreamMessage: (uid: number, payload: Uint8Array) => void
 }
+
 export type IMediaType = "audio" | "video" | "datachannel"
 export interface IVideoConnectionConfig {
     appId: string
     channelName: string
     token: string
     uid: UID
+    language: string
 }
 
 export interface IUidPlayerMapItem {

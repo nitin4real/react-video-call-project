@@ -14,6 +14,7 @@ const useMeet = () => {
     const [tokensRetrivedStatus, setTokenStatus] = useState<SetupState>('loading');
     const location = useLocation()
     const pathValues = location.pathname.split('/')
+    const language = pathValues[pathValues.length - 1]
     const channelName = pathValues[pathValues.length - 2]
     let username: string = String(localStorage.getItem('username'))
 
@@ -27,6 +28,7 @@ const useMeet = () => {
         token: "",
         appId: "",
         channelName: "",
+        language
     })
 
     const chatConfig = useRef<IChatConnectionConfig>({
@@ -46,7 +48,8 @@ const useMeet = () => {
             appId: response.appId,
             token: response.tokens.rtcToken,
             uid: response.uid,
-            channelName
+            channelName,
+            language
         }
 
         chatConfig.current = {
@@ -65,7 +68,7 @@ const useMeet = () => {
         if (tokensRetrivedStatus === 'loading') {
             try {
                 console.log('getting the new tokens')
-                tokenGenerator.GenerateTokenForUserID(username, channelName, onComplete)
+                tokenGenerator.GenerateTokenForUserID(username, channelName, language, onComplete)
             } catch (e) {
                 console.log("Error in generating tokens")
             }
@@ -94,11 +97,11 @@ export const MeetScreen = () => {
     console.log('onsucess - meetscreen')
 
     return <div className="full-screen-container">
-        <div className="left-pane">
+        <div className="video-pane">
             <VideoMeet onDisconnect={disconnectAllConnections} config={videoConfig} />
         </div>
-        <div className="right-pane">
+        {/* <div className="right-pane">
             <ChatComponent config={chatConfig} />
-        </div>
+        </div> */}
     </div>
 }
