@@ -28,6 +28,7 @@ const useMeet = () => {
         token: "",
         appId: "",
         channelName: "",
+        language
     })
 
     const chatConfig = useRef<IChatConnectionConfig>({
@@ -47,7 +48,8 @@ const useMeet = () => {
             appId: response.appId,
             token: response.tokens.rtcToken,
             uid: response.uid,
-            channelName
+            channelName,
+            language
         }
 
         chatConfig.current = {

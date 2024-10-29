@@ -60,6 +60,7 @@ export interface IVideoConnectionConfig {
     channelName: string
     token: string
     uid: UID
+    language: string
 }
 
 export interface IUidPlayerMapItem {

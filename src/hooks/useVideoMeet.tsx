@@ -5,6 +5,7 @@ import { ENPOINTS } from "../constants/apiEndpoints";
 import { videoController } from "../controllers/videoController";
 import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState, ITranscript } from "../interface/interfaces";
 import { userDataStore } from "../store/UserDataStore";
+import { getBotData } from "../utils/botCode";
 // import { voice2voiceTranslator } from "../services/voice2VoiceTranslationService";
 
 export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void) => {
@@ -102,19 +103,29 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
 
     const listenersRef = useRef<IVideoMeetListeners>({
         onUserJoined: (user: IAgoraRTCRemoteUser): void => {
+            if (String(user?.uid).length > 4) return;
             userDataStore.registerUser(String(user?.uid))
             pushInUidPlayerMap(Number(user?.uid));
         },
         onUserLeft: (user: IAgoraRTCRemoteUser, reason: string): void => {
             removeUserFromMap(Number(user?.uid));
         },
-        onUserPublished: async (user: IAgoraRTCRemoteUser, mediaType: IMediaType, config?: IDataChannelConfig | undefined) => {
+        onUserPublished: async (user: IAgoraRTCRemoteUser, mediaType: IMediaType, channelConfig?: IDataChannelConfig | undefined) => {
+            if(String(user?.uid).length > 4) {
+                const botData = getBotData(String(user?.uid))
+                if (botData.targetLangName !== config.language || botData.speakerUID === config.uid) {
+                    return
+                }
+            }
             await videoController.subscribeToRemoteUser(user, mediaType);
             // MARK: Only subscribe to users ignore the bots with 8 digit uid
             if (mediaType === 'video') {
+                if (String(user?.uid).length > 4) return
                 addVideoTrackToMap(Number(user?.uid), user?.videoTrack);
             } else if (mediaType === 'audio') {
+                // do not play audio for all the bots only those who speak your language
                 user?.audioTrack?.play();
+                if (String(user?.uid).length > 4) return
                 addAudioTrackToMap(Number(user?.uid), user?.audioTrack);
             }
         },
@@ -129,7 +140,17 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             speakers?.forEach(speaker => {
                 // console.log(speaker.level, speaker?.level > 100);
                 if (speaker?.uid && speaker?.level > 40) {
-                    setCurrentSpeakerUid(speaker.uid);
+                    if (String(speaker?.uid).length > 4) {
+                        const botData = getBotData(String(speaker?.uid))
+                        // set the master volumn to 20 for 3 seconds
+                        uidPlayerMap.find((item) => item.uid === Number(botData.speakerUID))?.audioTrack?.setVolume(25)
+                        setTimeout(() => {
+                            uidPlayerMap.find((item) => item.uid === Number(botData.speakerUID))?.audioTrack?.setVolume(100)
+                        }, 2000)
+                        setCurrentSpeakerUid(Number(botData.speakerUID));
+                    } else {
+                        setCurrentSpeakerUid(speaker.uid);
+                    }
                 }
             });
         },
@@ -137,7 +158,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             // convert Uint8Array to string
             const decoder = new TextDecoder();
             const str = decoder.decode(payload);
-            console.log(uid, str);  // Output: "Hello"
+            console.log(uid, str);
             const data = str.split('|')
             const transcriptionDataStr = atob(data[data.length - 1]);
             const transcriptionData = JSON.parse(transcriptionDataStr);
@@ -147,18 +168,16 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 uid,
                 transcriptionData.type
             );
-            setTranscript((transcript) => {
-                return [
-                    ...transcript,
-                    {
-                        uid: String(uid),
-                        text: transcriptionData.transcript,
-                        timestamp: new Date()
-                    }
-                ]
-            })
+            const botData = getBotData(String(uid))
+            console.log('botData',botData,config.uid,transcriptionData)
+            if (botData.speakerUID === config.uid && transcriptionData.type === 'conversation.item.input_audio_transcription.completed') {
+                onTranslationRecived(botData.speakerUID, transcriptionData.transcript)
+            } else if (botData.targetLangName === config.language && transcriptionData.type === 'response.audio_transcript.done') {
+                onTranslationRecived(botData.speakerUID, transcriptionData.transcript)
+            }
         }
     })
+
 
     const onCompleteCallback = (status: SetupState) => {
         setVideoSetupState(status);
