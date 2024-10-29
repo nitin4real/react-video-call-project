@@ -222,15 +222,27 @@ video {
   color: gray;
 }
 
+.control-buttons-wrapper {
+  z-index: 5;
+  justify-content: center;
+  align-items: center;
+  background-color: #8ddbff;
+  position: absolute;
+  bottom: 8vw;
+  padding: 20px;
+  width: 20vw;
+  left: 30%;
+  border-radius: 30px;
+}
 
-
-
-.control-buttons {
+.control-buttons-container {
   display: flex;
-  justify-content: space-around;
-  padding: 10px;
-  margin-top: 30px;
-  background-color: #f1f1f1;
+  justify-content: space-between;
+  flex-direction: row;
+  bottom: 8vw;
+  width: 20vw;
+  left: 30%;
+  border-radius: 30px;
 }
 
 
@@ -463,8 +475,28 @@ body {
   width: 100%;
 }
 
- .grid-video {
+.grid-video {
   width: 42%;
   margin: 2%;
 }
 
+.transcript-heading {
+  display: flex;
+  flex-direction: row;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border: 1px solid #ccc;
+  text-align: center;
+  padding: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.download-img {
+  color: white;
+  cursor: pointer;
+  height: 30px;
+  width: 30px;
+  margin-left: 10px;
+  margin-top: 3px;
+}

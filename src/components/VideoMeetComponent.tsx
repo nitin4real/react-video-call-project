@@ -9,7 +9,7 @@ import { userDataStore } from "../store/UserDataStore"
 import { TranscriptPanel } from "./TranscriptPanel"
 
 export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionConfig, onDisconnect: () => void }) => {
-    const { videoSetupState, setMeetStatus, currentSpeakerUid, uidPlayerMap, handleDisconnectClick, transcript } = useVideoMeet(config, onDisconnect)
+    const { videoSetupState, setMeetStatus, currentSpeakerUid, uidPlayerMap, handleDisconnectClick, transcript, completeTranscript } = useVideoMeet(config, onDisconnect)
     const [mode, setMode] = useState<'spotlight' | 'grid'>('grid');
     const [showTranscript, setShowTranscript] = useState(false)
     if (videoSetupState === 'loading') {
@@ -22,13 +22,13 @@ export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionCo
     return (
         <>
             <div className="video-meet">
-                <MeetControls setMeetStatus={setMeetStatus} mode={mode} setMode={setMode} handleDisconnectClick={handleDisconnectClick} />
                 <div className={'video-container-grid'}>
                     <GridView uidPlayerMap={uidPlayerMap} currentSpeakerUid={currentSpeakerUid} />
                 </div>
+                <MeetControls setMeetStatus={setMeetStatus} mode={mode} setMode={setMode} handleDisconnectClick={handleDisconnectClick} />
             </div>
             <div className="transcript-pane">
-                <TranscriptPanel transcript={transcript} currentUserId={String(config.uid)} />
+                <TranscriptPanel transcript={transcript} currentUserId={String(config.uid)} completeTranscript={completeTranscript} />
             </div>
         </>
 

@@ -13,9 +13,10 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const [currentSpeakerUid, setCurrentSpeakerUid] = useState<Number>(Number(config.uid));
     const [uidPlayerMap, setUidPlayerMap] = useState<IUidPlayerMapItem[]>([]);
     const [transcript, setTranscript] = useState<ITranscript[]>([])
+    const completeTranscript = useRef<ITranscript[]>([])
     const navigate = useNavigate();
     const location = useLocation()
-
+    
     const pushInUidPlayerMap = (uid: Number) => {
         setUidPlayerMap((currentMap) => {
             return [
@@ -143,10 +144,10 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                     if (String(speaker?.uid).length > 4) {
                         const botData = getBotData(String(speaker?.uid))
                         // set the master volumn to 20 for 3 seconds
-                        uidPlayerMap.find((item) => item.uid === Number(botData.speakerUID))?.audioTrack?.setVolume(25)
+                        uidPlayerMap.find((item) => Number(item.uid) === Number(botData.speakerUID))?.audioTrack?.setVolume(8)
                         setTimeout(() => {
-                            uidPlayerMap.find((item) => item.uid === Number(botData.speakerUID))?.audioTrack?.setVolume(100)
-                        }, 2000)
+                            uidPlayerMap.find((item) => Number(item.uid) === Number(botData.speakerUID))?.audioTrack?.setVolume(100)
+                        }, 3000)
                         setCurrentSpeakerUid(Number(botData.speakerUID));
                     } else {
                         setCurrentSpeakerUid(speaker.uid);
@@ -163,12 +164,15 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             const transcriptionDataStr = atob(data[data.length - 1]);
             const transcriptionData = JSON.parse(transcriptionDataStr);
             //  2 cases "response.audio_transcript.done" "conversation.item.input_audio_transcription.completed" 
-            console.log(
-                transcriptionData.transcript,
-                uid,
-                transcriptionData.type
-            );
+
             const botData = getBotData(String(uid))
+            completeTranscript.current.push({
+                uid: String(botData.speakerUID),
+                text: transcriptionData.transcript,
+                timestamp: new Date(),
+                spokenWords: transcriptionData.type === 'conversation.item.input_audio_transcription.completed'
+            })
+
             console.log('botData',botData,config.uid,transcriptionData)
             if (botData.speakerUID === config.uid && transcriptionData.type === 'conversation.item.input_audio_transcription.completed') {
                 onTranslationRecived(botData.speakerUID, transcriptionData.transcript)
@@ -279,6 +283,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         setMeetStatus,
         currentSpeakerUid,
         uidPlayerMap,
-        handleDisconnectClick
+        handleDisconnectClick,
+        completeTranscript
     };
 };
