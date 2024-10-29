@@ -76,4 +76,5 @@ export type ITranscript = {
     uid: string
     text: string
     timestamp: Date
+    spokenWords?: boolean
 }
