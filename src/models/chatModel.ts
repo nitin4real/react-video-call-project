@@ -34,7 +34,9 @@ export class ChatModel {
         }
 
         try {
-            await this.chatEngine.login()
+            await this.chatEngine.login({
+                token: config.token,
+            })
             const subscribeOptions = {
                 withMessage: true,
                 withPresence: true,

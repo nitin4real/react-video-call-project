@@ -47,7 +47,8 @@ export class VideoModel {
         this.videoEngine.on('user-left', listeners.onUserLeft)
         this.videoEngine.on('user-published', listeners.onUserPublished)
         this.videoEngine.on('user-unpublished', listeners.onUserUnpublished)
-        this.videoEngine.on('volume-indicator',listeners.onVolumnIndicator)
+        this.videoEngine.on('volume-indicator', listeners.onVolumnIndicator)
+        this.videoEngine.on('stream-message', listeners.onStreamMessage)
     }
 
     subscribe = (remoteUser: IAgoraRTCRemoteUser, mediaType: IMediaType) => {

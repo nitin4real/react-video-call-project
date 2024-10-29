@@ -1,6 +1,6 @@
 import { Socket, io as createSocketConnection } from "socket.io-client";
-import { WavRecorder, WavStreamPlayer } from "../lib/wavtools";
 let dummyI = 0;
+/**
 class Voice2VoiceTranslator {
     wavRecorder: WavRecorder = new WavRecorder({ sampleRate: 24000 })
     wavPlayer: WavStreamPlayer = new WavStreamPlayer({ sampleRate: 24000 })
@@ -88,3 +88,4 @@ class Voice2VoiceTranslator {
 
 // export const TmpAsync = async (userUid: string, channelName: string, languageCode: string, onTranscript: (uid: string, transcription: string) => void) => {}
 export const voice2voiceTranslator = new Voice2VoiceTranslator()
+*/

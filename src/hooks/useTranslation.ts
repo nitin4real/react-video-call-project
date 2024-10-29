@@ -1,4 +1,7 @@
 import { useCallback, useRef, useState } from "react";
+export const useTranslation = () => { }
+/**
+ * 
 import { WavRecorder, WavStreamPlayer } from "../lib/wavtools";
 
 export const useTranslation = () => {
@@ -26,10 +29,6 @@ export const useTranslation = () => {
         }, 3000);
     }, []);
 
-    /**
-     * Connect to conversation:
-     * WavRecorder taks speech input, WavStreamPlayer output, client is API client
-     */
     const connectConversation = useCallback(async () => {
         const wavRecorder = wavRecorderRef.current;
         const wavStreamPlayer = wavStreamPlayerRef.current;
@@ -38,9 +37,6 @@ export const useTranslation = () => {
         setIsConnected(true);
     }, []);
 
-    /**
-     * Disconnect and reset conversation state
-     */
 
     const disconnectConversation = useCallback(async () => {
         setIsConnected(false);
@@ -56,3 +52,4 @@ export const useTranslation = () => {
 
     };
 };
+ */
