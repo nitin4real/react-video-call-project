@@ -164,15 +164,10 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             const transcriptionDataStr = atob(data[data.length - 1]);
             const transcriptionData = JSON.parse(transcriptionDataStr);
             //  2 cases "response.audio_transcript.done" "conversation.item.input_audio_transcription.completed" 
-            console.log(
-                transcriptionData.transcript,
-                uid,
-                transcriptionData.type
-            );
 
             const botData = getBotData(String(uid))
             completeTranscript.current.push({
-                uid: String(uid),
+                uid: String(botData.speakerUID),
                 text: transcriptionData.transcript,
                 timestamp: new Date(),
                 spokenWords: transcriptionData.type === 'conversation.item.input_audio_transcription.completed'

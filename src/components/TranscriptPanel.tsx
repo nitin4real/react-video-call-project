@@ -26,7 +26,7 @@ export const TranscriptPanel = ({ transcript, currentUserId, completeTranscript 
             `transcript-${new Date().toISOString().replace(/:/g, '-')}.txt`
           }
           title="Download Complete Transcript"
-          href={`data:text/plain;charset=utf-8,${encodeURIComponent(completeTranscript.current.map((message) => `${message.timestamp.getUTCDate()}: ${message.uid}: ${userDataStore.getUserName(message.uid) || 'Unknown'}:  ${message.spokenWords ? '(SpokenWords)' : '(Translated)'}  ${message.text}`).join('\n'))}`
+          href={`data:text/plain;charset=utf-8,${encodeURIComponent(completeTranscript.current.map((message) => `${message.timestamp.toLocaleString()}: UID: ${message.uid}: ${userDataStore.getUserName(message.uid) || 'Unknown'}:  ${message.spokenWords ? '(SpokenWords)' : '(Translated)'}  ${message.text}`).join('\n'))}`
           }>
           <img className="download-img" src={downloadImg} alt="Download" />
 
