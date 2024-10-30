@@ -3,11 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ENPOINTS } from "../constants/apiEndpoints";
 import { videoController } from "../controllers/videoController";
-import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState, ITranscript } from "../interface/interfaces";
+import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState, ITranscript, AudioSuppresstionTimer } from "../interface/interfaces";
 import { userDataStore } from "../store/UserDataStore";
 import { getBotData } from "../utils/botCode";
-// import { voice2voiceTranslator } from "../services/voice2VoiceTranslationService";
-
 export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
     const [currentSpeakerUid, setCurrentSpeakerUid] = useState<Number>(Number(config.uid));
@@ -16,7 +14,8 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const completeTranscript = useRef<ITranscript[]>([])
     const navigate = useNavigate();
     const location = useLocation()
-    
+    const audioSuppressionTimers = useRef<AudioSuppresstionTimer[]>([])
+
     const pushInUidPlayerMap = (uid: Number) => {
         setUidPlayerMap((currentMap) => {
             return [
@@ -112,7 +111,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             removeUserFromMap(Number(user?.uid));
         },
         onUserPublished: async (user: IAgoraRTCRemoteUser, mediaType: IMediaType, channelConfig?: IDataChannelConfig | undefined) => {
-            if(String(user?.uid).length > 4) {
+            if (String(user?.uid).length > 4) {
                 const botData = getBotData(String(user?.uid))
                 if (botData.targetLangName !== config.language || botData.speakerUID === config.uid) {
                     return
@@ -126,7 +125,6 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             } else if (mediaType === 'audio') {
                 // do not play audio for all the bots only those who speak your language
                 user?.audioTrack?.play();
-                if (String(user?.uid).length > 4) return
                 addAudioTrackToMap(Number(user?.uid), user?.audioTrack);
             }
         },
@@ -139,17 +137,37 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         },
         onVolumnIndicator: (speakers) => {
             speakers?.forEach(speaker => {
-                // console.log(speaker.level, speaker?.level > 100);
-                if (speaker?.uid && speaker?.level > 40) {
-                    if (String(speaker?.uid).length > 4) {
-                        const botData = getBotData(String(speaker?.uid))
-                        // set the master volumn to 20 for 3 seconds
-                        uidPlayerMap.find((item) => Number(item.uid) === Number(botData.speakerUID))?.audioTrack?.setVolume(8)
-                        setTimeout(() => {
-                            uidPlayerMap.find((item) => Number(item.uid) === Number(botData.speakerUID))?.audioTrack?.setVolume(100)
-                        }, 3000)
-                        setCurrentSpeakerUid(Number(botData.speakerUID));
-                    } else {
+                if (String(speaker?.uid).length > 4) {
+                    const botData = { speakerUID: speaker.uid }
+                    setUidPlayerMap((uidPlayerMap) => {
+                        const speakerNode = uidPlayerMap.find((user) => {
+                            return String(speaker.uid) === String(botData.speakerUID)
+                        })
+                        if (speakerNode) {
+                            console.log('rararara','setting the volume to 5',speakerNode.audioTrack)
+                            speakerNode.audioTrack?.setVolume(5)
+                            // check if this user has a timer already
+                            const timoutObj = audioSuppressionTimers.current.find((item) => String(item.uid) === String(speaker.uid))
+                            const timerID = setTimeout(() => {
+                                speakerNode.audioTrack?.setVolume(100)
+                                // remove the timerObj from the array
+                                audioSuppressionTimers.current = audioSuppressionTimers.current.filter((item) => String(item.uid) !== String(speaker.uid))
+                            }, 3000);
+                            if (!!timoutObj) {
+                                clearTimeout(timoutObj?.timeoutId)
+                                timoutObj.timeoutId = timerID
+                            } else {
+                                audioSuppressionTimers.current.push({
+                                    timeoutId: timerID,
+                                    uid: String(speaker.uid)
+                                })
+                            }
+                        }
+                        return uidPlayerMap
+                    })
+                    setCurrentSpeakerUid(Number(botData.speakerUID));
+                } else {
+                    if (speaker?.uid && speaker?.level > 40) {
                         setCurrentSpeakerUid(speaker.uid);
                     }
                 }
@@ -173,7 +191,6 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 spokenWords: transcriptionData.type === 'conversation.item.input_audio_transcription.completed'
             })
 
-            console.log('botData',botData,config.uid,transcriptionData)
             if (botData.speakerUID === config.uid && transcriptionData.type === 'conversation.item.input_audio_transcription.completed') {
                 onTranslationRecived(botData.speakerUID, transcriptionData.transcript)
             } else if (botData.targetLangName === config.language && transcriptionData.type === 'response.audio_transcript.done') {
