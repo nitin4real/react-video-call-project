@@ -500,3 +500,11 @@ body {
   margin-left: 10px;
   margin-top: 3px;
 }
+
+.version-number {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  color: lightgrey;
+  font-size: 12px;
+}
