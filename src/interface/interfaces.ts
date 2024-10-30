@@ -78,3 +78,8 @@ export type ITranscript = {
     timestamp: Date
     spokenWords?: boolean
 }
+// import { voice2voiceTranslator } from "../services/voice2VoiceTranslationService";
+export type AudioSuppresstionTimer = {
+    timeoutId: NodeJS.Timeout;
+    uid: string;
+};
