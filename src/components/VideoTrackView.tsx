@@ -12,6 +12,7 @@ export const VideoTrackView = ({ userData, isSpeaking }: VideoTrackProps) => {
     const videoRef = useRef(null);
     const username = userData.uid
     const track = userData.videoTrack
+    const audioTrack = userData.audioTrack
     const latestWords1 = userData.transcript.at(-1)
     // const latestWords0 = userData.transcript.at(-2)
     const isVideoDisabled = !track
@@ -28,6 +29,8 @@ export const VideoTrackView = ({ userData, isSpeaking }: VideoTrackProps) => {
     }, [track]);
 
     return <div className="video-component" style={{ backgroundColor: isSpeaking ? '#8ddbff' : 'white' }}>
+        {/* <button onClick={() => {audioTrack?.setVolume(0)}}>Mute</button>
+        <button onClick={() => {audioTrack?.setVolume(100)}}>Unmute</button> */}
         {isVideoDisabled
             ? <div className="video-alt-container">
                 <img src={dummyUser} alt={String(username)} />

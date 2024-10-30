@@ -6,6 +6,7 @@ import { videoController } from "../controllers/videoController";
 import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState, ITranscript, AudioSuppresstionTimer } from "../interface/interfaces";
 import { userDataStore } from "../store/UserDataStore";
 import { getBotData } from "../utils/botCode";
+import { testingConfigs } from "../configs/testingConfigs";
 export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
     const [currentSpeakerUid, setCurrentSpeakerUid] = useState<Number>(Number(config.uid));
@@ -144,13 +145,13 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                             return String(user.uid) === String(botData.speakerUID)
                         })
                         if (masterSpeakerNode) {
-                            masterSpeakerNode.audioTrack?.setVolume(5)
+                            masterSpeakerNode.audioTrack?.setVolume(testingConfigs.audioSuppressionVolumeLevel)
                             // check if this user has a timer already
                             const timoutObj = audioSuppressionTimers.current.find((item) => String(item.uid) === String(speaker.uid))
                             const timerID = setTimeout(() => {
                                 masterSpeakerNode.audioTrack?.setVolume(100)
                                 audioSuppressionTimers.current = audioSuppressionTimers.current.filter((item) => String(item.uid) !== String(speaker.uid))
-                            }, 4000);
+                            }, 7000);
                             if (!!timoutObj) {
                                 clearTimeout(timoutObj?.timeoutId)
                                 timoutObj.timeoutId = timerID

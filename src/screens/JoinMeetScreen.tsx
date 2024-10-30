@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link } from 'react-router-dom';
 import { languageList } from "../constants/languageCodes";
 import Select from 'react-select';
+import TestingMenuBox from "../configs/testingMenuBox";
+import { CURRENT_VERSION } from "../configs/versions";
 
 
 
@@ -56,6 +58,11 @@ export const JoinMeetComponent = () => {
   const [channelName, setChannelName] = useState<string>('');
   const [selectedAvatarIndex, setSelectedAvatar] = useState<number>(-1);
   const [selectedLanguage, setSelectedLanguage] = useState('');
+  const [isTestingMode, setIsTestingMode] = useState(false);
+
+  const toggleTestingMode = () => {
+    setIsTestingMode(prevMode => !prevMode);
+  };
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -82,43 +89,52 @@ export const JoinMeetComponent = () => {
 
   return (
     <>
-      <img src="" className="login-background-img"/>
-        <div className="login-screen">
-          <div className="login-input-container">
-            <h2 className="demo-header">Real Time Speech to Speech Translation Demo </h2>
-            <LanguageDropdown
-              selectedLanguage={selectedLanguage}
-              setSelectedLanguage={setSelectedLanguage} />
-            <div className="input-container">
-              <input
-                type="text"
-                placeholder="Enter your username"
-                value={username}
-                onChange={handleUsernameChange}
-              />
-            </div>
-            <div className="input-container">
-              <input
-                type="text"
-                placeholder="Enter Channel Name"
-                value={channelName}
-                onChange={handleChannelnameChange}
-              />
-            </div>
-            <div>
-              <Link to={`meet/${channelName}/${selectedLanguage}`} onClick={setSessionData} >
-                <button className="login-button">Login</button>
-              </Link>
-            </div>
+      <img src="" className="login-background-img" />
+      <div className="login-screen">
+        <div className="login-input-container">
+          <h2 className="demo-header">Real Time Speech to Speech Translation Demo </h2>
+          {isTestingMode ? <TestingMenuBox /> : <></>}
+          <LanguageDropdown
+            selectedLanguage={selectedLanguage}
+            setSelectedLanguage={setSelectedLanguage} />
+          <div className="input-container">
+            <input
+              type="text"
+              placeholder="Enter your username"
+              value={username}
+              onChange={handleUsernameChange}
+            />
+          </div>
+          <div className="input-container">
+            <input
+              type="text"
+              placeholder="Enter Channel Name"
+              value={channelName}
+              onChange={handleChannelnameChange}
+            />
+          </div>
+          <div>
+            <Link to={`meet/${channelName}/${selectedLanguage}`} onClick={setSessionData} >
+              <button className="login-button">Login</button>
+            </Link>
+          </div>
 
-          </div>
-          <div style={{
-            borderRadius: '10px', margin: '10px'
-          }}>
-            <img src="https://cdn.freelogovectors.net/wp-content/uploads/2022/05/agora_logo_freelogovectors.net_.png" alt="Agora" className="agora-logo" />
-          </div>
         </div>
-      </>
+        <div style={{
+          borderRadius: '10px', margin: '10px'
+        }}>
+          <img 
+            src="https://cdn.freelogovectors.net/wp-content/uploads/2022/05/agora_logo_freelogovectors.net_.png" 
+            alt="Agora" 
+            className="agora-logo" 
+            onClick={toggleTestingMode} 
+          />
+        </div>
+        <div className="version-number">
+          {CURRENT_VERSION}
+        </div>
+      </div>
+    </>
 
-      );
+  );
 };
