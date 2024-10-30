@@ -137,22 +137,20 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         },
         onVolumnIndicator: (speakers) => {
             speakers?.forEach(speaker => {
-                if (String(speaker?.uid).length > 4) {
-                    const botData = { speakerUID: speaker.uid }
+                if (String(speaker?.uid).length > 4 && speaker?.level > 30) {
+                    const botData = getBotData(String(speaker?.uid))
                     setUidPlayerMap((uidPlayerMap) => {
-                        const speakerNode = uidPlayerMap.find((user) => {
-                            return String(speaker.uid) === String(botData.speakerUID)
+                        const masterSpeakerNode = uidPlayerMap.find((user) => {
+                            return String(user.uid) === String(botData.speakerUID)
                         })
-                        if (speakerNode) {
-                            console.log('rararara','setting the volume to 5',speakerNode.audioTrack)
-                            speakerNode.audioTrack?.setVolume(5)
+                        if (masterSpeakerNode) {
+                            masterSpeakerNode.audioTrack?.setVolume(5)
                             // check if this user has a timer already
                             const timoutObj = audioSuppressionTimers.current.find((item) => String(item.uid) === String(speaker.uid))
                             const timerID = setTimeout(() => {
-                                speakerNode.audioTrack?.setVolume(100)
-                                // remove the timerObj from the array
+                                masterSpeakerNode.audioTrack?.setVolume(100)
                                 audioSuppressionTimers.current = audioSuppressionTimers.current.filter((item) => String(item.uid) !== String(speaker.uid))
-                            }, 3000);
+                            }, 4000);
                             if (!!timoutObj) {
                                 clearTimeout(timoutObj?.timeoutId)
                                 timoutObj.timeoutId = timerID
