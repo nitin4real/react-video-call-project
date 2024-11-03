@@ -59,7 +59,7 @@ const useMeet = () => {
             channelName
         }
         userDataStore.setCurrentUserName(String(username))
-        userDataStore.registerUser(String(response.uid))
+        userDataStore.registerUser(String(response.uid),channelName)
         console.log('got the new tokens')
         setTokenStatus(status)
     }
