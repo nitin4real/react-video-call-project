@@ -16,6 +16,37 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const navigate = useNavigate();
     const location = useLocation()
     const audioSuppressionTimers = useRef<AudioSuppresstionTimer[]>([])
+    const transcriptionIntrimData = useRef<Map<String, Array<String | undefined>>>(new Map())
+
+
+    const handleIncompleteTranscript = (totalDataChunks: number, currentDataChunkNumber: number, dataChunk: String, itemId: String): string => {
+        if (transcriptionIntrimData.current.has(itemId)) {
+            const currentData = transcriptionIntrimData.current.get(itemId)
+            if (currentData) {
+                currentData[currentDataChunkNumber - 1] = dataChunk
+                // if all the values then make a string and return
+                let totalChunksCollected = 0
+                currentData.forEach((dataChunk, index) => {
+                    if (dataChunk !== undefined) {
+                        totalChunksCollected += 1
+                    }
+                })
+                if (totalChunksCollected === totalDataChunks) {
+                    // remove the item from the map
+                    transcriptionIntrimData.current.delete(itemId)
+                    return currentData.join('')
+                }
+                transcriptionIntrimData.current.set(itemId, currentData)
+                return ''
+            }
+        } else {
+            const data = new Array(totalDataChunks)
+            data[currentDataChunkNumber - 1] = dataChunk
+            transcriptionIntrimData.current.set(itemId, data)
+            return ''
+        }
+        return ''
+    }
 
     const pushInUidPlayerMap = (uid: Number) => {
         setUidPlayerMap((currentMap) => {
@@ -105,7 +136,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const listenersRef = useRef<IVideoMeetListeners>({
         onUserJoined: (user: IAgoraRTCRemoteUser): void => {
             if (String(user?.uid).length > 4) return;
-            userDataStore.registerUser(String(user?.uid),config.channelName)
+            userDataStore.registerUser(String(user?.uid), config.channelName)
             pushInUidPlayerMap(Number(user?.uid));
         },
         onUserLeft: (user: IAgoraRTCRemoteUser, reason: string): void => {
@@ -177,9 +208,23 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             try {
                 const decoder = new TextDecoder();
                 const str = decoder.decode(payload);
-                console.log(uid, str);
+                // console.log(uid, str);
                 const data = str.split('|')
-                const transcriptionDataStr = atob(data[data.length - 1]);
+                const itemId = data[0]
+                const currentDataChunkNumber = Number(data[1])
+                const totalDataChunks = Number(data[2]);
+                let transcriptionDataStr = ''
+                if (totalDataChunks > 1) {
+                    const incompleteTranscript = handleIncompleteTranscript(totalDataChunks, currentDataChunkNumber, data[3], itemId)
+                    if (incompleteTranscript !== '') {
+                        // console.log('incompleteTranscript', incompleteTranscript)
+                        transcriptionDataStr = atob(incompleteTranscript)
+                    } else {
+                        return
+                    }
+                } else {
+                    transcriptionDataStr = atob(data[3]);
+                }
                 const transcriptionData = JSON.parse(transcriptionDataStr);
                 //  2 cases "response.audio_transcript.done" "conversation.item.input_audio_transcription.completed" 
 
