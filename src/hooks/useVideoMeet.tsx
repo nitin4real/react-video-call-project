@@ -105,7 +105,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const listenersRef = useRef<IVideoMeetListeners>({
         onUserJoined: (user: IAgoraRTCRemoteUser): void => {
             if (String(user?.uid).length > 4) return;
-            userDataStore.registerUser(String(user?.uid))
+            userDataStore.registerUser(String(user?.uid),config.channelName)
             pushInUidPlayerMap(Number(user?.uid));
         },
         onUserLeft: (user: IAgoraRTCRemoteUser, reason: string): void => {
@@ -151,7 +151,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                             const timerID = setTimeout(() => {
                                 masterSpeakerNode.audioTrack?.setVolume(100)
                                 audioSuppressionTimers.current = audioSuppressionTimers.current.filter((item) => String(item.uid) !== String(speaker.uid))
-                            }, 7000);
+                            }, 12000);
                             if (!!timoutObj) {
                                 clearTimeout(timoutObj?.timeoutId)
                                 timoutObj.timeoutId = timerID
@@ -174,26 +174,30 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         },
         onStreamMessage: (uid, payload) => {
             // convert Uint8Array to string
-            const decoder = new TextDecoder();
-            const str = decoder.decode(payload);
-            console.log(uid, str);
-            const data = str.split('|')
-            const transcriptionDataStr = atob(data[data.length - 1]);
-            const transcriptionData = JSON.parse(transcriptionDataStr);
-            //  2 cases "response.audio_transcript.done" "conversation.item.input_audio_transcription.completed" 
+            try {
+                const decoder = new TextDecoder();
+                const str = decoder.decode(payload);
+                console.log(uid, str);
+                const data = str.split('|')
+                const transcriptionDataStr = atob(data[data.length - 1]);
+                const transcriptionData = JSON.parse(transcriptionDataStr);
+                //  2 cases "response.audio_transcript.done" "conversation.item.input_audio_transcription.completed" 
 
-            const botData = getBotData(String(uid))
-            completeTranscript.current.push({
-                uid: String(botData.speakerUID),
-                text: transcriptionData.transcript,
-                timestamp: new Date(),
-                spokenWords: transcriptionData.type === 'conversation.item.input_audio_transcription.completed'
-            })
+                const botData = getBotData(String(uid))
+                completeTranscript.current.push({
+                    uid: String(botData.speakerUID),
+                    text: transcriptionData.transcript,
+                    timestamp: new Date(),
+                    spokenWords: transcriptionData.type === 'conversation.item.input_audio_transcription.completed'
+                })
 
-            if (botData.speakerUID === config.uid && transcriptionData.type === 'conversation.item.input_audio_transcription.completed') {
-                onTranslationRecived(botData.speakerUID, transcriptionData.transcript)
-            } else if (botData.targetLangName === config.language && transcriptionData.type === 'response.audio_transcript.done') {
-                onTranslationRecived(botData.speakerUID, transcriptionData.transcript)
+                if (botData.speakerUID === config.uid && transcriptionData.type === 'conversation.item.input_audio_transcription.completed') {
+                    onTranslationRecived(botData.speakerUID, transcriptionData.transcript)
+                } else if (botData.targetLangName === config.language && transcriptionData.type === 'response.audio_transcript.done') {
+                    onTranslationRecived(botData.speakerUID, transcriptionData.transcript)
+                }
+            } catch (error) {
+                console.error('Error processing stream message:', error);
             }
         }
     })

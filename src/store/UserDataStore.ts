@@ -22,14 +22,15 @@ class UserDataStore {
         return this.currentUserName
     }
 
-    registerUser = async (uid: String) => {
+    registerUser = async (uid: String, channelName: String) => {
         if (this.uidMap.uid) {
             return
         }
         try {
             const response = await axios.get(`${ENPOINTS.BASE_URL}/getUserName`, {
                 params: {
-                    uid
+                    uid,
+                    channelName
                 },
             })
 
