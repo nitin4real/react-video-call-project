@@ -90,7 +90,7 @@ export const JoinMeetComponent = () => {
 
   return (
     <>
-      <img src="" className="login-background-img" />
+      <div className="login-background-img" />
       <div className="login-screen">
         <div className="login-input-container">
           <h2 className="demo-header">Real Time Speech to Speech Translation Demo </h2>

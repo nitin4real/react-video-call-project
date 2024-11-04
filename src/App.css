@@ -469,9 +469,22 @@ input {
   width: 70%;
 }
 
+.login-background-img {
+  z-index: -1;
+  position: absolute;
+  background-color: #0f6faf;
+  width: 100%;
+  top: 0;
+  bottom: 0;
+}
+
+
 @media (max-width: 1100px) {
+  .login-background-img {
+    display: none;
+  }
   .login-screen {
-    margin: 2vh 5vh;
+    margin: 2vh 5vw;
     height: 96vh;
     padding: 0;
     flex-direction: column-reverse;
@@ -519,14 +532,6 @@ body {
 }
 
 
-.login-background-img {
-  z-index: -1;
-  position: absolute;
-  background-color: #0f6faf;
-  width: 100%;
-  top: 0;
-  bottom: 0;
-}
 
 .transcript-pane {
   display: none;
