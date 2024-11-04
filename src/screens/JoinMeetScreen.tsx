@@ -27,7 +27,7 @@ const LanguageDropdown = ({ selectedLanguage, setSelectedLanguage }: { selectedL
         control: (styles) => ({
           ...styles,
           backgroundColor: 'white',
-          width: '30%',
+          width: window.innerWidth <= 1100 ? 'auto' : '30%',
           borderRadius: '10px'
         }),
         option: (styles, { isFocused, isSelected }) => {
@@ -39,8 +39,7 @@ const LanguageDropdown = ({ selectedLanguage, setSelectedLanguage }: { selectedL
         },
         menu: (styles) => ({
           ...styles,
-          width: '30%',
-
+          width: window.innerWidth <= 1100 ? '100%' : '30%',
           borderRadius: '10px',
           marginTop: '2px'
         })
@@ -122,14 +121,12 @@ export const JoinMeetComponent = () => {
           </div>
 
         </div>
-        <div style={{
-          borderRadius: '10px', margin: '10px'
-        }}>
+        <div className="login-logo">
           <img 
             src={agoraLogo} 
             alt="Agora" 
             className="agora-logo" 
-            onClick={toggleTestingMode} 
+            // onClick={toggleTestingMode} 
           />
         </div>
         <div className="version-number">
