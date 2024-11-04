@@ -1,9 +1,9 @@
 import { useState } from "react";
-import disconnectImg from '../images/phone.png'
 import videoOn from '../images/videoon.png'
 import videoOff from '../images/videooff.png'
 import mute from '../images/mute.png'
 import unmute from '../images/record.png'
+import { InfoComponent } from "./Info";
 
 export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectClick }: any) => {
     const [audio, setAudio] = useState<'on' | 'off'>('on');
@@ -11,6 +11,7 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
 
     const micImage = audio === 'on' ? unmute : mute
     const camaraImage = video === 'on' ? videoOn : videoOff
+    const isVideoOn = video === 'on' ? true : false
 
     const handleAudioClick = () => {
         if (audio === 'off') {
@@ -43,10 +44,17 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
 
     return <div className="control-buttons-wrapper">
         <div className="control-buttons-container">
-            <img height={30} width={30} src={micImage} alt="Audio" onClick={handleAudioClick} />
-            <img height={30} width={30} src={camaraImage} alt="Video" onClick={handleVideoClick} />
+            <button onClick={handleAudioClick} className="round-btn">
+                <img height={30} width={30} src={micImage} alt="Audio" />
+            </button>
+            <button onClick={handleVideoClick} className="round-btn">
+                <img height={isVideoOn ? 40 : 30} width={isVideoOn ? 40 : 30} src={camaraImage} alt="Video" />
+            </button>
+            <InfoComponent />
             {/* <button onClick={handleStateClick}>Change View to {mode === 'grid' ? 'spotlight' : 'grid'}</button> */}
-            <img height={30} width={30} src={disconnectImg} alt="Disconnect" onClick={handleDisconnectClick} />
+            <button className="leave-btn" onClick={handleDisconnectClick}>
+                Leave
+            </button>
         </div>
 
     </div>;

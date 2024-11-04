@@ -28,15 +28,17 @@ export const VideoTrackView = ({ userData, isSpeaking }: VideoTrackProps) => {
         };
     }, [track]);
 
-    return <div className="video-component" style={{ backgroundColor: isSpeaking ? '#8ddbff' : 'white' }}>
+    return <div className={`video-component ${isSpeaking ? "glow-on-speaker" : ""}`}>
         {/* <button onClick={() => {audioTrack?.setVolume(0)}}>Mute</button>
         <button onClick={() => {audioTrack?.setVolume(100)}}>Unmute</button> */}
         {isVideoDisabled
-            ? <div className="video-alt-container">
+            ? <div className="video-box-container">
                 <img src={dummyUser} alt={String(username)} />
             </div>
             :
-            <video style={{ maxHeight: 500, objectFit: 'contain' }} ref={videoRef} autoPlay />
+            <div className="video-box-container">
+                <video  ref={videoRef} autoPlay />
+            </div>
         }
         {/* {latestWords0 ? <div className="transcript-subtitle">{latestWords0}</div> : <></>} */}
         {latestWords1 ? <div className="transcript-subtitle">{latestWords1}</div> : <></>}

@@ -7,6 +7,13 @@ import { VideoTrackView } from "./VideoTrackView"
 import { useVideoMeet } from "../hooks/useVideoMeet"
 import { userDataStore } from "../store/UserDataStore"
 import { TranscriptPanel } from "./TranscriptPanel"
+import background1 from '../images/backgrounds/background1.jpg'
+import background2 from '../images/backgrounds/background2.jpg'
+import background3 from '../images/backgrounds/background3.jpg'
+import background4 from '../images/backgrounds/background4.jpg'
+import background5 from '../images/backgrounds/background5.jpg'
+import { MeetHeader } from "./MeetHeader"
+const backgroundImages = [background1, background2, background3, background4, background5]
 
 export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionConfig, onDisconnect: () => void }) => {
     const { videoSetupState, setMeetStatus, currentSpeakerUid, uidPlayerMap, handleDisconnectClick, transcript, completeTranscript } = useVideoMeet(config, onDisconnect)
@@ -17,13 +24,32 @@ export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionCo
     } else if (videoSetupState === 'error') {
         return <ErrorComponent message="Error In Loading Video Meet" />
     }
+    const userId = Number(config.uid)
+    const randomBg = userId % 5 + 1
+    const imageIndex = randomBg >= 0 && randomBg < 5 ? randomBg : 0
+    const randomBackground = backgroundImages[imageIndex]
+    const backgroundStyle = {
+        backgroundImage: `url(${randomBackground})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        height: '100vh',
+        width: '100%',
+        color: 'red',
+        borderRadius: '15px',
+        margin: '5px',
+    };
+
     const containerStyle = mode === 'grid' ? 'video-container-grid' : 'video-container'
     const reversedMessages = [...transcript].reverse()
+
     return (
         <>
             <div className="video-meet">
-                <div className={'video-container-grid'}>
-                    <GridView uidPlayerMap={uidPlayerMap} currentSpeakerUid={currentSpeakerUid} />
+                <MeetHeader />
+                <div className="background-image" style={backgroundStyle}>
+                    <div className={'video-container-grid'}>
+                        <GridView uidPlayerMap={uidPlayerMap} currentSpeakerUid={currentSpeakerUid} />
+                    </div>
                 </div>
                 <MeetControls setMeetStatus={setMeetStatus} mode={mode} setMode={setMode} handleDisconnectClick={handleDisconnectClick} />
             </div>
@@ -47,3 +73,17 @@ const GridView = ({ uidPlayerMap, currentSpeakerUid }: { uidPlayerMap: IUidPlaye
         ))}
     </>
 }
+
+function BackgroundImageComponent() {
+    const style = {
+        backgroundImage: 'url("path/to/your-image.jpg")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        height: '100vh',
+        width: '100%',
+    };
+
+    return <div style={style}>Your content here</div>;
+}
+
+export default BackgroundImageComponent;

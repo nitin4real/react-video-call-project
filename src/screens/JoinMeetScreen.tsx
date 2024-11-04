@@ -4,6 +4,8 @@ import { languageList } from "../constants/languageCodes";
 import Select from 'react-select';
 import TestingMenuBox from "../configs/testingMenuBox";
 import { CURRENT_VERSION } from "../configs/versions";
+import agoraLogo from '../images/agoraLogo.png';
+
 
 
 
@@ -124,7 +126,7 @@ export const JoinMeetComponent = () => {
           borderRadius: '10px', margin: '10px'
         }}>
           <img 
-            src="https://cdn.freelogovectors.net/wp-content/uploads/2022/05/agora_logo_freelogovectors.net_.png" 
+            src={agoraLogo} 
             alt="Agora" 
             className="agora-logo" 
             onClick={toggleTestingMode} 
