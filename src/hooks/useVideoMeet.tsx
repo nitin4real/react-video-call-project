@@ -9,7 +9,7 @@ import { getBotData } from "../utils/botCode";
 import { testingConfigs } from "../configs/testingConfigs";
 export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
-    const [currentSpeakerUid, setCurrentSpeakerUid] = useState<Number>(Number(config.uid));
+    const [currentSpeakerUid, setCurrentSpeakerUid] = useState<Number>(-1);
     const [uidPlayerMap, setUidPlayerMap] = useState<IUidPlayerMapItem[]>([]);
     const [transcript, setTranscript] = useState<ITranscript[]>([])
     const completeTranscript = useRef<ITranscript[]>([])
@@ -145,7 +145,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         onUserPublished: async (user: IAgoraRTCRemoteUser, mediaType: IMediaType, channelConfig?: IDataChannelConfig | undefined) => {
             if (String(user?.uid).length > 4) {
                 const botData = getBotData(String(user?.uid))
-                if (botData.targetLangName !== config.language || botData.speakerUID === config.uid) {
+                if (botData.targetLangName !== config.language || botData.speakerUID === config.uid || botData.srcLangName === config.language) {
                     return
                 }
             }
@@ -197,8 +197,15 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                     })
                     setCurrentSpeakerUid(Number(botData.speakerUID));
                 } else {
+                    let currentSpeakerUIDLocal: Number = -1
+                    setCurrentSpeakerUid((currentSpeakerUID) => {
+                        currentSpeakerUIDLocal = currentSpeakerUID
+                        return currentSpeakerUID
+                    });
                     if (speaker?.uid && speaker?.level > 40) {
                         setCurrentSpeakerUid(speaker.uid);
+                    } else if (currentSpeakerUIDLocal === speaker?.uid) {
+                        setCurrentSpeakerUid(-1);
                     }
                 }
             });
