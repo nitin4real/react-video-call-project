@@ -2,21 +2,20 @@ import { useState } from "react";
 import { setTestingConfigs } from "../configs/testingConfigs";
 import info from '../images/info.png'
 import illustration from '../images/illustrationAnimation.gif'
+import { howItWorksText } from "../constants/info";
 
 export const InfoComponent = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [viewArchitecture, setViewArchitecture] = useState(false);
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
     };
-    const setNewSettings = () => {
-        // Get the input value and set it to the testingConfigs
 
-        const volumeInput = document.getElementById('volumeInput') as HTMLInputElement;
-        if (volumeInput) {
-            setTestingConfigs('audioSuppressionVolumeLevel', volumeInput.value);
-        }
-    }
+    const toggleView = () => {
+        setViewArchitecture(show => !show);
+    };
+
     return (
         <>
             <button onClick={toggleModal} className="round-btn">
@@ -25,48 +24,34 @@ export const InfoComponent = () => {
 
 
             {isModalOpen && (
-                <div style={modalStyles}>
-                    <div style={overlayStyles} onClick={toggleModal}></div>
-                    <div style={modalContentStyles}>
-                        <h2>
+                <div className="info-modal">
+                    <div className="info-modal-overlay" onClick={toggleModal}></div>
+                    <div className="info-modal-content">
+                        <h3>
                             How it works
-                        </h2>
-                        <p>Agora and open ai. (Under construction)</p>
-                        <img height={'50%'} width={'50%'}  src={illustration} />
-                        <button style={{ margin: 10 }} onClick={toggleModal}>Close</button>
+                        </h3>
+                        {
+                            viewArchitecture ?
+                                <img className="info-modal-img" src={illustration} />
+                                :
+                                <p className="info-modal-text">
+                                    {howItWorksText}
+                                    <p>
+                                        For more information on Agora SD-RTN, visit <a href="https://www.agora.io/en/the-agora-platform-advantage/" target="_blank" rel="noopener noreferrer">Agora</a>
+                                    </p>
+                                    <p>
+                                        For more information on OpenAI Realtime API <a href="https://openai.com/index/introducing-the-realtime-api/" target="_blank" rel="noopener noreferrer">OpenAI</a>
+                                    </p>
+                                    <p>
+                                        For more information on Agora - OpenAI Realtime Collaboration, visit <a href="https://www.agora.io/en/products/agora-openai-conversational-ai-sdk/" target="_blank" rel="noopener noreferrer"> Click Here </a>
+                                    </p>
+                                </p>
+                        }
+                        <button className="info-modal-btn" onClick={toggleView}>Show {viewArchitecture ? `Details` : `Architecture`}</button>
+                        <button className="info-modal-btn" onClick={toggleModal}>Close</button>
                     </div>
                 </div>
             )}
         </>
     );
-};
-
-
-const modalStyles: React.CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-};
-
-const overlayStyles: React.CSSProperties = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-};
-
-const modalContentStyles: React.CSSProperties = {
-    position: 'relative',
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '8px',
-    zIndex: 1001,
 };

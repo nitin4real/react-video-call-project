@@ -483,6 +483,7 @@ input {
   .login-background-img {
     display: none;
   }
+
   .login-screen {
     margin: 2vh 5vw;
     height: 96vh;
@@ -498,7 +499,7 @@ input {
     justify-content: flex-start;
     align-items: center;
   }
-  
+
   .login-input-container input {
     width: 50vw;
   }
@@ -509,7 +510,7 @@ input {
     width: 50vw;
   }
 
-  .demo-header {    
+  .demo-header {
     font-size: 1.2rem;
     text-align: center;
   }
@@ -657,4 +658,94 @@ body {
   .header-oai-logo {
     height: 7vw;
   }
+}
+
+.info-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.info-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.info-modal-content {
+  background-color: white;
+  width: 80%;
+  padding: 20px;
+  border-radius: 8px;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-height: 80%;
+}
+
+@media (max-width: 768px) {
+  .info-modal-content {
+    overflow: scroll;
+  }
+}
+
+.info-modal-content h3 {
+  margin: 5px;
+}
+
+.info-modal-btn {
+  background-color: #099dfd;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.info-modal-btn:hover {
+  background-color: #1171b1;
+}
+
+.info-modal-text {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+}
+
+.info-modal-img {
+  width: 50%;
+  height: 50%;
+  margin-bottom: 20px;
+}
+
+.leave-btn {
+  background-color: #f44336;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin: 0 10px;
+}
+
+.leave-btn:hover {
+  background-color: red;
+}
+
+.info-modal-text a:visited,
+.info-modal-text a:hover,
+.info-modal-text a:active {
+  color: #099dfd;
 }

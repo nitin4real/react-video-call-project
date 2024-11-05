@@ -182,7 +182,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                             const timerID = setTimeout(() => {
                                 masterSpeakerNode.audioTrack?.setVolume(100)
                                 audioSuppressionTimers.current = audioSuppressionTimers.current.filter((item) => String(item.uid) !== String(speaker.uid))
-                            }, 12000);
+                            }, 30000);
                             if (!!timoutObj) {
                                 clearTimeout(timoutObj?.timeoutId)
                                 timoutObj.timeoutId = timerID
