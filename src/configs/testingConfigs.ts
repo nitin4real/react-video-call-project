@@ -8,5 +8,5 @@ interface TestingConfigs {
 }
 
 export const testingConfigs: TestingConfigs = {
-    audioSuppressionVolumeLevel: 20,
+    audioSuppressionVolumeLevel: 8,
 }
