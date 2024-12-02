@@ -23,7 +23,7 @@ This project enables real-time multilingual communication through speech transla
 ### Configuration
 
 - To switch environments, edit the **apiEndpoints.ts file**.  
-  Set the BASE_URL to your desired environment. Use `http://localhost:3013` for local development.
+  Set the BASE_URL to your desired environment.
 
 ---
 
