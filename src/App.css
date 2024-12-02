@@ -749,3 +749,32 @@ body {
 .info-modal-text a:active {
   color: #099dfd;
 }
+
+.vol-slider-container {
+  border: 1px solid #ccc;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.vol-slider-container input {
+  padding: 0%;
+  width: 100%;
+  margin: auto;
+  margin: 10px;
+}
+
+.auto-volume-checkbox-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 10px;
+  border: 1px solid #ccc;
+  font-size: 1.4rem;
+}
+
+.auto-volume-checkbox {
+  margin: 10px;
+  height: 20px;
+  border: 1px solid red;
+}

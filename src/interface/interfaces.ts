@@ -83,3 +83,9 @@ export type AudioSuppresstionTimer = {
     timeoutId: NodeJS.Timeout;
     uid: string;
 };
+export interface TranslationConfigs {
+    userVolume: number;
+    botVolume: number;
+    dynamicVolume: boolean;
+    isTranslationActive: boolean
+}

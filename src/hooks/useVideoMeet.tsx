@@ -1,9 +1,9 @@
 import AgoraRTC, { IAgoraRTCRemoteUser, IDataChannelConfig } from "agora-rtc-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ENPOINTS } from "../constants/apiEndpoints";
 import { videoController } from "../controllers/videoController";
-import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState, ITranscript, AudioSuppresstionTimer } from "../interface/interfaces";
+import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState, ITranscript, AudioSuppresstionTimer, TranslationConfigs } from "../interface/interfaces";
 import { userDataStore } from "../store/UserDataStore";
 import { getBotData } from "../utils/botCode";
 import { testingConfigs } from "../configs/testingConfigs";
@@ -17,7 +17,38 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const location = useLocation()
     const audioSuppressionTimers = useRef<AudioSuppresstionTimer[]>([])
     const transcriptionIntrimData = useRef<Map<String, Array<String | undefined>>>(new Map())
+    const translationConfigRef = useRef<TranslationConfigs>({
+        userVolume: testingConfigs.audioSuppressionVolumeLevel,
+        botVolume: 100,
+        dynamicVolume: false,
+        isTranslationActive: true
+    })
 
+
+    const updateVolume = useCallback((updatedConfig: TranslationConfigs) => {
+        if(translationConfigRef.current.dynamicVolume !== updatedConfig.dynamicVolume) {
+            translationConfigRef.current.dynamicVolume = updatedConfig.dynamicVolume
+        }
+        translationConfigRef.current = updatedConfig
+        setUidPlayerMap((uidPlayerMap) => {
+            return uidPlayerMap.map((user) => {
+                if (user.audioTrack && String(user.uid).length === 8) {
+                    if(updatedConfig.isTranslationActive) {
+                    user.audioTrack.setVolume(updatedConfig.botVolume)
+                    } else {
+                        user.audioTrack.setVolume(0)
+                    }
+                } else if (user.audioTrack) {
+                    if(updatedConfig.isTranslationActive) {
+                    user.audioTrack.setVolume(updatedConfig.userVolume)
+                    } else {
+                        user.audioTrack.setVolume(100)
+                    }
+                }
+                return user
+            })
+        })
+    }, [uidPlayerMap])
 
     const handleIncompleteTranscript = (totalDataChunks: number, currentDataChunkNumber: number, dataChunk: String, itemId: String): string => {
         if (transcriptionIntrimData.current.has(itemId)) {
@@ -135,7 +166,6 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
 
     const listenersRef = useRef<IVideoMeetListeners>({
         onUserJoined: (user: IAgoraRTCRemoteUser): void => {
-            if (String(user?.uid).length > 4) return;
             userDataStore.registerUser(String(user?.uid), config.channelName)
             pushInUidPlayerMap(Number(user?.uid));
         },
@@ -156,6 +186,12 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 addVideoTrackToMap(Number(user?.uid), user?.videoTrack);
             } else if (mediaType === 'audio') {
                 // do not play audio for all the bots only those who speak your language
+                if(user?.uid == config.uid) {
+                    return
+                }
+                if(String(user?.uid).length == 4) {
+                    user.audioTrack?.setVolume(translationConfigRef.current.userVolume)
+                }
                 user?.audioTrack?.play();
                 addAudioTrackToMap(Number(user?.uid), user?.audioTrack);
             }
@@ -175,14 +211,14 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                         const masterSpeakerNode = uidPlayerMap.find((user) => {
                             return String(user.uid) === String(botData.speakerUID)
                         })
-                        if (masterSpeakerNode) {
-                            masterSpeakerNode.audioTrack?.setVolume(testingConfigs.audioSuppressionVolumeLevel)
+                        if (masterSpeakerNode && translationConfigRef.current.dynamicVolume) {
+                            masterSpeakerNode.audioTrack?.setVolume(translationConfigRef.current.userVolume)
                             // check if this user has a timer already
                             const timoutObj = audioSuppressionTimers.current.find((item) => String(item.uid) === String(speaker.uid))
                             const timerID = setTimeout(() => {
                                 masterSpeakerNode.audioTrack?.setVolume(100)
                                 audioSuppressionTimers.current = audioSuppressionTimers.current.filter((item) => String(item.uid) !== String(speaker.uid))
-                            }, 30000);
+                            }, 6000);
                             if (!!timoutObj) {
                                 clearTimeout(timoutObj?.timeoutId)
                                 timoutObj.timeoutId = timerID
@@ -220,33 +256,42 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 const itemId = data[0]
                 const currentDataChunkNumber = Number(data[1])
                 const totalDataChunks = Number(data[2]);
-                let transcriptionDataStr = ''
+                let chatMessageStr = ''
                 if (totalDataChunks > 1) {
                     const incompleteTranscript = handleIncompleteTranscript(totalDataChunks, currentDataChunkNumber, data[3], itemId)
                     if (incompleteTranscript !== '') {
                         // console.log('incompleteTranscript', incompleteTranscript)
-                        transcriptionDataStr = atob(incompleteTranscript)
+                        chatMessageStr = atob(incompleteTranscript)
                     } else {
                         return
                     }
                 } else {
-                    transcriptionDataStr = atob(data[3]);
+                    chatMessageStr = atob(data[3]);
                 }
-                const transcriptionData = JSON.parse(transcriptionDataStr);
-                //  2 cases "response.audio_transcript.done" "conversation.item.input_audio_transcription.completed" 
-
+                const chatMessage = JSON.parse(chatMessageStr);
                 const botData = getBotData(String(uid))
-                completeTranscript.current.push({
-                    uid: String(botData.speakerUID),
-                    text: transcriptionData.transcript,
-                    timestamp: new Date(),
-                    spokenWords: transcriptionData.type === 'conversation.item.input_audio_transcription.completed'
-                })
-
-                if (botData.speakerUID === config.uid && transcriptionData.type === 'conversation.item.input_audio_transcription.completed') {
-                    onTranslationRecived(botData.speakerUID, transcriptionData.transcript)
-                } else if (botData.targetLangName === config.language && transcriptionData.type === 'response.audio_transcript.done') {
-                    onTranslationRecived(botData.speakerUID, transcriptionData.transcript)
+                if (chatMessage.type === 'session.updated') {
+                    // according to uid and languages it is decided if bot is ready. 
+                    // console.log('chatMessage', chatMessage)
+                    if (botData.targetLang === botData.srcLang && String(botData.speakerUID) === String(config.uid)) {
+                        // console.log('Your transcription is live now')
+                    } else if (botData.targetLangName === config.language) {
+                        // console.log('Your Translation and transcriptions is live now', userDataStore.getUserName(botData.speakerUID))
+                    }
+                }
+                //  2 cases "response.audio_transcript.done" "conversation.item.input_audio_transcription.completed" 
+                if (chatMessage.type === 'response.audio_transcript.done' || chatMessage.type === 'response.text.done') {
+                    completeTranscript.current.push({
+                        uid: String(botData.speakerUID),
+                        text: chatMessage.type === 'response.text.done' ? chatMessage.text : chatMessage.transcript,
+                        timestamp: new Date(),
+                        spokenWords: chatMessage.type === 'response.text.done'
+                    })
+                }
+                if (botData.speakerUID === config.uid && chatMessage.type === 'response.text.done') {
+                    onTranslationRecived(botData.speakerUID, chatMessage.text)
+                } else if (botData.targetLangName === config.language && (chatMessage.type === 'response.audio_transcript.done')) {
+                    onTranslationRecived(botData.speakerUID, chatMessage.transcript)
                 }
             } catch (error) {
                 console.error('Error processing stream message:', error);
@@ -356,6 +401,8 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         currentSpeakerUid,
         uidPlayerMap,
         handleDisconnectClick,
-        completeTranscript
+        completeTranscript,
+        updateCurrentVolume: updateVolume,
+        currentVolume: translationConfigRef
     };
 };

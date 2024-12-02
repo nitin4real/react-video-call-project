@@ -16,7 +16,15 @@ import { MeetHeader } from "./MeetHeader"
 const backgroundImages = [background1, background2, background3, background4, background5]
 
 export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionConfig, onDisconnect: () => void }) => {
-    const { videoSetupState, setMeetStatus, currentSpeakerUid, uidPlayerMap, handleDisconnectClick, transcript, completeTranscript } = useVideoMeet(config, onDisconnect)
+    const { videoSetupState,
+        setMeetStatus,
+        currentSpeakerUid,
+        uidPlayerMap,
+        handleDisconnectClick,
+        transcript,
+        completeTranscript,
+        updateCurrentVolume,
+        currentVolume } = useVideoMeet(config, onDisconnect)
     const [mode, setMode] = useState<'spotlight' | 'grid'>('grid');
     const [showTranscript, setShowTranscript] = useState(false)
     if (videoSetupState === 'loading') {
@@ -51,7 +59,13 @@ export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionCo
                         <GridView uidPlayerMap={uidPlayerMap} currentSpeakerUid={currentSpeakerUid} />
                     </div>
                 </div>
-                <MeetControls setMeetStatus={setMeetStatus} mode={mode} setMode={setMode} handleDisconnectClick={handleDisconnectClick} />
+                <MeetControls
+                    setMeetStatus={setMeetStatus}
+                    mode={mode}
+                    currentVolume={currentVolume}
+                    setMode={setMode}
+                    handleDisconnectClick={handleDisconnectClick}
+                    updateCurrentVolume={updateCurrentVolume} />
             </div>
             <div className="transcript-pane">
                 <TranscriptPanel transcript={transcript} currentUserId={String(config.uid)} completeTranscript={completeTranscript} />
@@ -64,13 +78,15 @@ export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionCo
 
 
 const GridView = ({ uidPlayerMap, currentSpeakerUid }: { uidPlayerMap: IUidPlayerMap, currentSpeakerUid: Number }) => {
-
     return <>
-        {uidPlayerMap.map((video, index) => (
-            <div key={index} className="grid-video">
-                <VideoTrackView isSpeaking={currentSpeakerUid == video.uid} key={index} userData={video} />
-            </div>
-        ))}
+        {uidPlayerMap.map((video, index) => {
+            return String(video.uid).length === 4 ?
+                <div key={index} className="grid-video">
+                    <VideoTrackView isSpeaking={currentSpeakerUid == video.uid} key={index} userData={video} />
+                </div>
+                : <></>
+        }
+        )}
     </>
 }
 

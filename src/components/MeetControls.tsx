@@ -4,8 +4,17 @@ import videoOff from '../images/videooff.png'
 import mute from '../images/mute.png'
 import unmute from '../images/record.png'
 import { InfoComponent } from "./Info";
+import { AdvSettingComponent } from "./AdvSettingComponent";
+import { TranslationConfigs } from "../interface/interfaces";
 
-export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectClick }: any) => {
+export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectClick, updateCurrentVolume, currentVolume }: {
+    setMeetStatus: (type: 'audio' | 'video', value: boolean) => void,
+    setMode: (mode: 'spotlight' | 'grid') => void,
+    mode: 'spotlight' | 'grid',
+    handleDisconnectClick: () => void,
+    updateCurrentVolume: (config: TranslationConfigs) => void,
+    currentVolume: React.MutableRefObject<TranslationConfigs>
+}) => {
     const [audio, setAudio] = useState<'on' | 'off'>('on');
     const [video, setVideo] = useState<'on' | 'off'>('on');
 
@@ -50,7 +59,10 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
             <button onClick={handleVideoClick} className="round-btn">
                 <img height={isVideoOn ? 40 : 30} width={isVideoOn ? 40 : 30} src={camaraImage} alt="Video" />
             </button>
-            {/* <InfoComponent /> */}
+            <InfoComponent />
+            <AdvSettingComponent
+                currentVolume={currentVolume}
+                setAudioVolume={updateCurrentVolume} />
             {/* <button onClick={handleStateClick}>Change View to {mode === 'grid' ? 'spotlight' : 'grid'}</button> */}
             <button className="leave-btn" onClick={handleDisconnectClick}>
                 Leave
