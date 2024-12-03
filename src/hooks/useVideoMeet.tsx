@@ -185,7 +185,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 addVideoTrackToMap(Number(user?.uid), user?.videoTrack);
             } else if (mediaType === 'audio') {
                 // do not play audio for all the bots only those who speak your language
-                if (user?.uid == config.uid || String(user?.uid) === "-1") {
+                if (user?.uid == config.uid || String(user?.uid) === "11") {
                     return
                 }
                 if (String(user?.uid).length == 4) {
@@ -308,7 +308,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             const speakerNodeIndex = uidPlayerMap.findIndex((user) => {
                 return String(user.uid) === String(uid)
             })
-            if (speakerNodeIndex !== -1 && transcriptText.trim()) {
+            if (speakerNodeIndex !== -1 && transcriptText?.trim()) {
                 setTranscript((transcript) => {
                     return [
                         ...transcript,

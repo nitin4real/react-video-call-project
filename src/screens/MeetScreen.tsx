@@ -58,7 +58,7 @@ const useMeet = () => {
             uid: response.uid,
             channelName
         }
-        if(response.uid === "-1"){
+        if(response.uid === "11"){
             userDataStore.setIsRecorder(true)
         } else {
             userDataStore.setCurrentUserName(String(username))
