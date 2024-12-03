@@ -59,7 +59,7 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
             <button onClick={handleVideoClick} className="round-btn">
                 <img height={isVideoOn ? 40 : 30} width={isVideoOn ? 40 : 30} src={camaraImage} alt="Video" />
             </button>
-            <InfoComponent />
+            {/* <InfoComponent /> */}
             <AdvSettingComponent
                 currentVolume={currentVolume}
                 setAudioVolume={updateCurrentVolume} />
