@@ -9,6 +9,7 @@ import { videoController } from "../controllers/videoController";
 import { IChatConnectionConfig, ITokenResponse, IVideoConnectionConfig, SetupState } from "../interface/interfaces";
 import { userDataStore } from "../store/UserDataStore";
 import { tokenGenerator } from "../utils/AgoraTokenGenerator";
+import { strings } from "../contants/strings";
 
 const useMeet = () => {
     const [tokensRetrivedStatus, setTokenStatus] = useState<SetupState>('loading');
@@ -58,7 +59,7 @@ const useMeet = () => {
             uid: response.uid,
             channelName
         }
-        if(response.uid === "11"){
+        if(response.uid === strings.recorderID){
             userDataStore.setIsRecorder(true)
         } else {
             userDataStore.setCurrentUserName(String(username))

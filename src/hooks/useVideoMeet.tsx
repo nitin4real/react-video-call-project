@@ -7,6 +7,8 @@ import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListen
 import { userDataStore } from "../store/UserDataStore";
 import { getBotData } from "../utils/botCode";
 import { testingConfigs } from "../configs/testingConfigs";
+import { strings } from "../contants/strings";
+
 export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
     const [currentSpeakerUid, setCurrentSpeakerUid] = useState<Number>(-1);
@@ -173,6 +175,10 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             removeUserFromMap(Number(user?.uid));
         },
         onUserPublished: async (user: IAgoraRTCRemoteUser, mediaType: IMediaType, channelConfig?: IDataChannelConfig | undefined) => {
+            console.log('onUserPublished', user, mediaType)
+            if(String(user?.uid) === strings.recorderID) {
+                return
+            }
             if (!isSelfRecorder && String(user?.uid).length > 4) {
                 const botData = getBotData(String(user?.uid))
                 if (botData.targetLangName !== config.language || botData.speakerUID === config.uid || botData.srcLangName === config.language) {
@@ -185,7 +191,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 addVideoTrackToMap(Number(user?.uid), user?.videoTrack);
             } else if (mediaType === 'audio') {
                 // do not play audio for all the bots only those who speak your language
-                if (user?.uid == config.uid || String(user?.uid) === "11") {
+                if (user?.uid == config.uid || String(user?.uid) === strings.recorderID) {
                     return
                 }
                 if (String(user?.uid).length == 4) {
