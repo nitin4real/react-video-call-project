@@ -15,8 +15,8 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const [uidPlayerMap, setUidPlayerMap] = useState<IUidPlayerMapItem[]>([]);
     const [transcript, setTranscript] = useState<ITranscript[]>([])
     const completeTranscript = useRef<ITranscript[]>([])
-    const [isRecording, setIsRecording] = useState<boolean>(false)
     const isSelfRecorder = useRef<boolean>(userDataStore.isSelfRecorder).current
+    const [isRecording, setIsRecording] = useState<boolean>(isSelfRecorder)
     const navigate = useNavigate();
     const location = useLocation()
     const audioSuppressionTimers = useRef<AudioSuppresstionTimer[]>([])
