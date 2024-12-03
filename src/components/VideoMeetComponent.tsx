@@ -24,7 +24,9 @@ export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionCo
         transcript,
         completeTranscript,
         updateCurrentVolume,
-        currentVolume } = useVideoMeet(config, onDisconnect)
+        currentVolume,
+        isRecording
+    } = useVideoMeet(config, onDisconnect)
     const [mode, setMode] = useState<'spotlight' | 'grid'>('grid');
     const [showTranscript, setShowTranscript] = useState(false)
     if (videoSetupState === 'loading') {
@@ -60,6 +62,7 @@ export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionCo
                     </div>
                 </div>
                 <MeetControls
+                    isRecording={isRecording}
                     setMeetStatus={setMeetStatus}
                     mode={mode}
                     currentVolume={currentVolume}

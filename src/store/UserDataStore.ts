@@ -9,11 +9,17 @@ class UserDataStore {
     isSelfRecorder: boolean
     uidMap: StringMap
     currentUserName: string
+    channelName: string
 
     constructor() {
         this.isSelfRecorder = false
         this.uidMap = {}
         this.currentUserName = ""
+        this.channelName = ""
+    }
+
+    setChannelName = (name: string) => {
+        this.channelName = name
     }
 
     setIsRecorder = (status: boolean) => {

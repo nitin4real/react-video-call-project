@@ -15,6 +15,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const [uidPlayerMap, setUidPlayerMap] = useState<IUidPlayerMapItem[]>([]);
     const [transcript, setTranscript] = useState<ITranscript[]>([])
     const completeTranscript = useRef<ITranscript[]>([])
+    const [isRecording, setIsRecording] = useState<boolean>(false)
     const isSelfRecorder = useRef<boolean>(userDataStore.isSelfRecorder).current
     const navigate = useNavigate();
     const location = useLocation()
@@ -168,10 +169,16 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
 
     const listenersRef = useRef<IVideoMeetListeners>({
         onUserJoined: (user: IAgoraRTCRemoteUser): void => {
+            if(String(user?.uid) === strings.recorderID){
+                setIsRecording(true)
+            }
             userDataStore.registerUser(String(user?.uid), config.channelName)
             pushInUidPlayerMap(Number(user?.uid));
         },
         onUserLeft: (user: IAgoraRTCRemoteUser, reason: string): void => {
+            if(String(user?.uid) === strings.recorderID){
+                setIsRecording(false)
+            }
             removeUserFromMap(Number(user?.uid));
         },
         onUserPublished: async (user: IAgoraRTCRemoteUser, mediaType: IMediaType, channelConfig?: IDataChannelConfig | undefined) => {
@@ -414,6 +421,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         handleDisconnectClick,
         completeTranscript,
         updateCurrentVolume: updateVolume,
-        currentVolume: translationConfigRef
+        currentVolume: translationConfigRef,
+        isRecording
     };
 };

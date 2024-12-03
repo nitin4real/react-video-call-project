@@ -3,17 +3,57 @@ import videoOn from '../images/videoon.png'
 import videoOff from '../images/videooff.png'
 import mute from '../images/mute.png'
 import unmute from '../images/record.png'
+import recActive from '../images/rec_active.png'
+import recDeactive from '../images/rec_deactive.png'
 import { InfoComponent } from "./Info";
 import { AdvSettingComponent } from "./AdvSettingComponent";
 import { TranslationConfigs } from "../interface/interfaces";
+import { RecordingServices } from "../services/recordingServices";
+import { userDataStore } from "../store/UserDataStore";
+export enum RecorderStatus {
+    STARTED = 'STARTED',
+    STOPPED = 'STOPPED',
+    ALREADY_RECORDING = 'ALREADY RECORDING',
+    ERROR = 'ERROR'
+}
 
-export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectClick, updateCurrentVolume, currentVolume }: {
+const RecordMeetingComponent = ({
+    isRecording
+}: {
+    isRecording: boolean
+}) => {
+    // const toggleRecording = () => {
+    //     setIsRecording(rec => !rec);
+    // }
+    return (
+        <button onClick={() => {
+            if (!isRecording) {
+                RecordingServices.startRecording(userDataStore.channelName).then((status: RecorderStatus) => {
+                    if (status === RecorderStatus.STARTED || status === RecorderStatus.ALREADY_RECORDING) {
+                        // toggleRecording()
+                    }
+                })
+            } else {
+                RecordingServices.stopRecording(userDataStore.channelName).then((status: RecorderStatus) => {
+                    if (status === RecorderStatus.STOPPED) {
+                        // toggleRecording()
+                    }
+                })
+            }
+        }} className="round-btn">
+            <img height={30} width={30} src={isRecording ? recActive : recDeactive} alt={`${isRecording ? 'recording' : 'record'}`} />
+        </button>
+    )
+}
+
+export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectClick, updateCurrentVolume, currentVolume, isRecording }: {
     setMeetStatus: (type: 'audio' | 'video', value: boolean) => void,
     setMode: (mode: 'spotlight' | 'grid') => void,
     mode: 'spotlight' | 'grid',
     handleDisconnectClick: () => void,
     updateCurrentVolume: (config: TranslationConfigs) => void,
-    currentVolume: React.MutableRefObject<TranslationConfigs>
+    currentVolume: React.MutableRefObject<TranslationConfigs>,
+    isRecording: boolean
 }) => {
     const [audio, setAudio] = useState<'on' | 'off'>('on');
     const [video, setVideo] = useState<'on' | 'off'>('on');
@@ -60,6 +100,7 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
                 <img height={isVideoOn ? 40 : 30} width={isVideoOn ? 40 : 30} src={camaraImage} alt="Video" />
             </button>
             {/* <InfoComponent /> */}
+            <RecordMeetingComponent isRecording={isRecording}/>
             <AdvSettingComponent
                 currentVolume={currentVolume}
                 setAudioVolume={updateCurrentVolume} />
