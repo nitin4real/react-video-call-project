@@ -23,7 +23,7 @@ This project enables real-time multilingual communication through speech transla
 ### Configuration
 
 - To switch environments, edit the **apiEndpoints.ts file**.  
-  Set the BASE_URL to your desired environment. Use `http://localhost:3013` for local development.
+  Set the BASE_URL to your desired environment.
 
 ---
 
@@ -127,7 +127,7 @@ Agents and users in the meeting are uniquely identified by their UIDs:
 - When a user leaves the channel, their corresponding agents are removed.  
 
 - For detailed information about agent creation and lifecycle management, refer to the backend service documentation linked below:  
-  - **NodeJS Service**: Responsible for token generation and AI agent management. [Link Will Be Added soon]
-  - **Python Service**: Built on Agora-OpenAI-PythonSDK for agent creation and channel management for audio translation. [Link Will Be Added soon]  
+  - **NodeJS Service**: Responsible for token generation and AI agent management. [Repository Link](https://github.com/nitin4real/agora-backend)
+  - **Python Service**: Built on Agora-OpenAI-PythonSDK for agent creation and channel management for audio translation. [Repository Link](https://github.com/nitin4real/s2s-agora-openai-realtime-translation)  
 
 ---
