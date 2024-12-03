@@ -17,7 +17,7 @@ const useMeet = () => {
     const language = pathValues[pathValues.length - 1]
     const channelName = pathValues[pathValues.length - 2]
     let username: string = String(localStorage.getItem('username'))
-
+    const isRecorder = location.search.split('=')[1] === 'recorder'
     const disconnectAllConnections = () => {
         videoController.resetController()
         chatController.resetController()
@@ -58,8 +58,12 @@ const useMeet = () => {
             uid: response.uid,
             channelName
         }
-        userDataStore.setCurrentUserName(String(username))
-        userDataStore.registerUser(String(response.uid),channelName)
+        if(response.uid === "-1"){
+            userDataStore.setIsRecorder(true)
+        } else {
+            userDataStore.setCurrentUserName(String(username))
+            userDataStore.registerUser(String(response.uid),channelName)
+        }
         console.log('got the new tokens')
         setTokenStatus(status)
     }
@@ -68,7 +72,7 @@ const useMeet = () => {
         if (tokensRetrivedStatus === 'loading') {
             try {
                 console.log('getting the new tokens')
-                tokenGenerator.GenerateTokenForUserID(username, channelName, language, onComplete)
+                tokenGenerator.GenerateTokenForUserID(username, channelName, language,isRecorder, onComplete)
             } catch (e) {
                 console.log("Error in generating tokens")
             }

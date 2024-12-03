@@ -13,6 +13,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const [uidPlayerMap, setUidPlayerMap] = useState<IUidPlayerMapItem[]>([]);
     const [transcript, setTranscript] = useState<ITranscript[]>([])
     const completeTranscript = useRef<ITranscript[]>([])
+    const isSelfRecorder = useRef<boolean>(userDataStore.isSelfRecorder).current
     const navigate = useNavigate();
     const location = useLocation()
     const audioSuppressionTimers = useRef<AudioSuppresstionTimer[]>([])
@@ -24,23 +25,22 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         isTranslationActive: true
     })
 
-
     const updateVolume = useCallback((updatedConfig: TranslationConfigs) => {
-        if(translationConfigRef.current.dynamicVolume !== updatedConfig.dynamicVolume) {
+        if (translationConfigRef.current.dynamicVolume !== updatedConfig.dynamicVolume) {
             translationConfigRef.current.dynamicVolume = updatedConfig.dynamicVolume
         }
         translationConfigRef.current = updatedConfig
         setUidPlayerMap((uidPlayerMap) => {
             return uidPlayerMap.map((user) => {
                 if (user.audioTrack && String(user.uid).length === 8) {
-                    if(updatedConfig.isTranslationActive) {
-                    user.audioTrack.setVolume(updatedConfig.botVolume)
+                    if (updatedConfig.isTranslationActive) {
+                        user.audioTrack.setVolume(updatedConfig.botVolume)
                     } else {
                         user.audioTrack.setVolume(0)
                     }
                 } else if (user.audioTrack) {
-                    if(updatedConfig.isTranslationActive) {
-                    user.audioTrack.setVolume(updatedConfig.userVolume)
+                    if (updatedConfig.isTranslationActive) {
+                        user.audioTrack.setVolume(updatedConfig.userVolume)
                     } else {
                         user.audioTrack.setVolume(100)
                     }
@@ -173,7 +173,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             removeUserFromMap(Number(user?.uid));
         },
         onUserPublished: async (user: IAgoraRTCRemoteUser, mediaType: IMediaType, channelConfig?: IDataChannelConfig | undefined) => {
-            if (String(user?.uid).length > 4) {
+            if (!isSelfRecorder && String(user?.uid).length > 4) {
                 const botData = getBotData(String(user?.uid))
                 if (botData.targetLangName !== config.language || botData.speakerUID === config.uid || botData.srcLangName === config.language) {
                     return
@@ -181,15 +181,14 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             }
             await videoController.subscribeToRemoteUser(user, mediaType);
             // MARK: Only subscribe to users ignore the bots with 8 digit uid
-            if (mediaType === 'video') {
-                if (String(user?.uid).length > 4) return
+            if (mediaType === 'video' && String(user?.uid).length === 4) {
                 addVideoTrackToMap(Number(user?.uid), user?.videoTrack);
             } else if (mediaType === 'audio') {
                 // do not play audio for all the bots only those who speak your language
-                if(user?.uid == config.uid) {
+                if (user?.uid == config.uid || String(user?.uid) === "-1") {
                     return
                 }
-                if(String(user?.uid).length == 4) {
+                if (String(user?.uid).length == 4) {
                     user.audioTrack?.setVolume(translationConfigRef.current.userVolume)
                 }
                 user?.audioTrack?.play();
@@ -288,9 +287,9 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                         spokenWords: chatMessage.type === 'response.text.done'
                     })
                 }
-                if (botData.speakerUID === config.uid && chatMessage.type === 'response.text.done') {
+                if (isSelfRecorder || botData.speakerUID === config.uid && chatMessage.type === 'response.text.done') {
                     onTranslationRecived(botData.speakerUID, chatMessage.text)
-                } else if (botData.targetLangName === config.language && (chatMessage.type === 'response.audio_transcript.done')) {
+                } else if (isSelfRecorder || botData.targetLangName === config.language && (chatMessage.type === 'response.audio_transcript.done')) {
                     onTranslationRecived(botData.speakerUID, chatMessage.transcript)
                 }
             } catch (error) {
@@ -354,6 +353,9 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
 
 
     const setAudioStatus = (state: boolean) => {
+        if (isSelfRecorder) {
+            return
+        }
         if (state === true) {
             AgoraRTC.createMicrophoneAudioTrack().then(
                 (track) => {
@@ -369,6 +371,10 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     };
 
     const setVideoStatus = (state: boolean) => {
+        if (isSelfRecorder) {
+            return
+        }
+
         if (state === true) {
             AgoraRTC.createCameraVideoTrack().then(
                 (track) => {

@@ -6,12 +6,18 @@ interface StringMap {
 }
 
 class UserDataStore {
+    isSelfRecorder: boolean
     uidMap: StringMap
     currentUserName: string
 
     constructor() {
+        this.isSelfRecorder = false
         this.uidMap = {}
         this.currentUserName = ""
+    }
+
+    setIsRecorder = (status: boolean) => {
+        this.isSelfRecorder = status
     }
 
     setCurrentUserName = (name: string) => {
