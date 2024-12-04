@@ -89,3 +89,8 @@ export interface TranslationConfigs {
     dynamicVolume: boolean;
     isTranslationActive: boolean
 }
+export interface IPopupItem {
+    id:number
+    title: string;
+    description: string;
+}

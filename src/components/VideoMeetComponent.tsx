@@ -13,6 +13,7 @@ import background3 from '../images/backgrounds/background3.jpg'
 import background4 from '../images/backgrounds/background4.jpg'
 import background5 from '../images/backgrounds/background5.jpg'
 import { MeetHeader } from "./MeetHeader"
+import { PopupView } from "./PopupView"
 const backgroundImages = [background1, background2, background3, background4, background5]
 
 export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionConfig, onDisconnect: () => void }) => {
@@ -25,7 +26,10 @@ export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionCo
         completeTranscript,
         updateCurrentVolume,
         currentVolume,
-        isRecording
+        isRecording,
+        popups,
+        closePopup,
+        addPopup
     } = useVideoMeet(config, onDisconnect)
     const [mode, setMode] = useState<'spotlight' | 'grid'>('grid');
     const [showTranscript, setShowTranscript] = useState(false)
@@ -58,6 +62,7 @@ export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionCo
                 <MeetHeader />
                 <div className="background-image" style={backgroundStyle}>
                     <div className={'video-container-grid'}>
+                        <PopupView popups={popups} closePopup={closePopup} />
                         <GridView uidPlayerMap={uidPlayerMap} currentSpeakerUid={currentSpeakerUid} />
                     </div>
                 </div>
@@ -67,6 +72,7 @@ export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionCo
                     mode={mode}
                     currentVolume={currentVolume}
                     setMode={setMode}
+                    addPopup={addPopup}
                     handleDisconnectClick={handleDisconnectClick}
                     updateCurrentVolume={updateCurrentVolume} />
             </div>

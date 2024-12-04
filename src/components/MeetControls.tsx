@@ -7,7 +7,7 @@ import recActive from '../images/rec_active.png'
 import recDeactive from '../images/rec_deactive.png'
 import { InfoComponent } from "./Info";
 import { AdvSettingComponent } from "./AdvSettingComponent";
-import { TranslationConfigs } from "../interface/interfaces";
+import { IPopupItem, TranslationConfigs } from "../interface/interfaces";
 import { RecordingServices } from "../services/recordingServices";
 import { userDataStore } from "../store/UserDataStore";
 export enum RecorderStatus {
@@ -18,25 +18,42 @@ export enum RecorderStatus {
 }
 
 const RecordMeetingComponent = ({
-    isRecording
+    isRecording,
+    addPopup
 }: {
-    isRecording: boolean
+    isRecording: boolean, 
+    addPopup: (popup: IPopupItem) => void
 }) => {
-    // const toggleRecording = () => {
-    //     setIsRecording(rec => !rec);
-    // }
     return (
         <button onClick={() => {
             if (!isRecording) {
+                addPopup({
+                    id: -1,
+                    title: 'Recording',
+                    description: 'Hold on, Starting Recording...'
+                })
                 RecordingServices.startRecording(userDataStore.channelName).then((status: RecorderStatus) => {
-                    if (status === RecorderStatus.STARTED || status === RecorderStatus.ALREADY_RECORDING) {
-                        // toggleRecording()
+                    if (status === RecorderStatus.ERROR) {
+                        addPopup({
+                            id: -1,
+                            title: 'Recording',
+                            description: 'Error in Start Recording'
+                        })
                     }
                 })
             } else {
+                addPopup({
+                    id: -1,
+                    title: 'Recording',
+                    description: 'Hold on, Stopping Recording...'
+                })
                 RecordingServices.stopRecording(userDataStore.channelName).then((status: RecorderStatus) => {
-                    if (status === RecorderStatus.STOPPED) {
-                        // toggleRecording()
+                    if (status === RecorderStatus.ERROR) {
+                        addPopup({
+                            id: -1,
+                            title: 'Recording',
+                            description: 'Error in Stop Recording'
+                        })
                     }
                 })
             }
@@ -46,14 +63,15 @@ const RecordMeetingComponent = ({
     )
 }
 
-export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectClick, updateCurrentVolume, currentVolume, isRecording }: {
+export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectClick, updateCurrentVolume, currentVolume, isRecording, addPopup }: {
     setMeetStatus: (type: 'audio' | 'video', value: boolean) => void,
     setMode: (mode: 'spotlight' | 'grid') => void,
     mode: 'spotlight' | 'grid',
     handleDisconnectClick: () => void,
     updateCurrentVolume: (config: TranslationConfigs) => void,
     currentVolume: React.MutableRefObject<TranslationConfigs>,
-    isRecording: boolean
+    isRecording: boolean,
+    addPopup: (popup: IPopupItem) => void
 }) => {
     const [audio, setAudio] = useState<'on' | 'off'>('on');
     const [video, setVideo] = useState<'on' | 'off'>('on');
@@ -100,7 +118,7 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
                 <img height={isVideoOn ? 40 : 30} width={isVideoOn ? 40 : 30} src={camaraImage} alt="Video" />
             </button>
             {/* <InfoComponent /> */}
-            <RecordMeetingComponent isRecording={isRecording}/>
+            <RecordMeetingComponent addPopup={addPopup} isRecording={isRecording}/>
             <AdvSettingComponent
                 currentVolume={currentVolume}
                 setAudioVolume={updateCurrentVolume} />

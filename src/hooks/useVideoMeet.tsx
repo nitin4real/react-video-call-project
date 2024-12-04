@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ENPOINTS } from "../constants/apiEndpoints";
 import { videoController } from "../controllers/videoController";
-import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState, ITranscript, AudioSuppresstionTimer, TranslationConfigs } from "../interface/interfaces";
+import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState, ITranscript, AudioSuppresstionTimer, TranslationConfigs, IPopupItem } from "../interface/interfaces";
 import { userDataStore } from "../store/UserDataStore";
 import { getBotData } from "../utils/botCode";
 import { testingConfigs } from "../configs/testingConfigs";
@@ -19,6 +19,8 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const [isRecording, setIsRecording] = useState<boolean>(isSelfRecorder)
     const navigate = useNavigate();
     const location = useLocation()
+    const [popups, setPopups] = useState<IPopupItem[]>([])
+    const popupID = useRef<number>(0)
     const audioSuppressionTimers = useRef<AudioSuppresstionTimer[]>([])
     const transcriptionIntrimData = useRef<Map<String, Array<String | undefined>>>(new Map())
     const translationConfigRef = useRef<TranslationConfigs>({
@@ -169,20 +171,30 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
 
     const listenersRef = useRef<IVideoMeetListeners>({
         onUserJoined: (user: IAgoraRTCRemoteUser): void => {
-            if(String(user?.uid) === strings.recorderID){
+            if (String(user?.uid) === strings.recorderID) {
+                addPopup({
+                    id: -1,
+                    title: 'Recording',
+                    description: 'Recording Started.'
+                })
                 setIsRecording(true)
             }
             userDataStore.registerUser(String(user?.uid), config.channelName)
             pushInUidPlayerMap(Number(user?.uid));
         },
         onUserLeft: (user: IAgoraRTCRemoteUser, reason: string): void => {
-            if(String(user?.uid) === strings.recorderID){
+            if (String(user?.uid) === strings.recorderID) {
+                addPopup({
+                    id: -1,
+                    title: 'Recording',
+                    description: 'Recording Stopped.'
+                })
                 setIsRecording(false)
             }
             removeUserFromMap(Number(user?.uid));
         },
         onUserPublished: async (user: IAgoraRTCRemoteUser, mediaType: IMediaType, channelConfig?: IDataChannelConfig | undefined) => {
-            if(String(user?.uid) === strings.recorderID) {
+            if (String(user?.uid) === strings.recorderID) {
                 return
             }
             if (!isSelfRecorder && String(user?.uid).length > 4) {
@@ -285,8 +297,19 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                     // according to uid and languages it is decided if bot is ready. 
                     // console.log('chatMessage', chatMessage)
                     if (botData.targetLang === botData.srcLang && String(botData.speakerUID) === String(config.uid)) {
+                        addPopup({
+                            id: -1,
+                            title: 'Translation',
+                            description: 'Your transcription are live now.'
+                        })
                         // console.log('Your transcription is live now')
                     } else if (botData.targetLangName === config.language) {
+                        const userName = userDataStore.getUserName(botData.speakerUID)
+                        addPopup({
+                            id: -1,
+                            title: 'Translation',
+                            description: `${userName} Translation and transcriptions are live now.`
+                        })
                         // console.log('Your Translation and transcriptions is live now', userDataStore.getUserName(botData.speakerUID))
                     }
                 }
@@ -412,6 +435,32 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         }
     };
 
+    const closePopup = (id: number) => {
+        setPopups((popups) => {
+            return popups.filter((popup, index) => {
+                return popup.id !== id
+            })
+        })
+    }
+
+    const addPopup = (popup: IPopupItem) => {
+        if (popup.id === -1) {
+            popup.id = popupID.current
+            popupID.current += 1
+        }
+        const popupId = popup.id
+        setPopups((popups) => {
+            return [
+                ...popups,
+                popup
+            ]
+        })
+        setTimeout(() => {
+            closePopup(popupId)
+        }, 5000)
+    }
+
+
     return {
         transcript,
         videoSetupState,
@@ -422,6 +471,9 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         completeTranscript,
         updateCurrentVolume: updateVolume,
         currentVolume: translationConfigRef,
-        isRecording
+        isRecording,
+        popups,
+        closePopup,
+        addPopup
     };
 };

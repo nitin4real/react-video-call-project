@@ -28,10 +28,10 @@ export const AdvSettingComponent = ({
             {isModalOpen && (
                 <div className="info-modal">
                     <div className="info-modal-overlay" onClick={toggleModal}></div>
-                    <div className="info-modal-content">
-                        <h3>
+                    <div className="adv-setting-modal-content">
+                        <h4>
                             Advance Settings
-                        </h3>
+                        </h4>
                         {/* bot volume */}
                         <div className="vol-slider-container">
                             <input
@@ -68,6 +68,10 @@ export const AdvSettingComponent = ({
                             />
                             <span>{userVolume} Orignal Volume</span>
                         </div>
+
+
+
+
                         <div className="auto-volume-checkbox-container">
                             <input
                                 className="auto-volume-checkbox"
@@ -97,7 +101,6 @@ export const AdvSettingComponent = ({
                                     });
                                 }}
                             />
-
                             Translation Active
                         </div>
                         <button className="info-modal-btn" onClick={toggleModal}>Close</button>
