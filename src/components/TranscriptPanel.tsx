@@ -9,6 +9,7 @@ import { userDataStore } from "../store/UserDataStore";
 
 export const TranscriptPanel = ({ transcript, currentUserId, completeTranscript }: { transcript: ITranscript[], currentUserId: string, completeTranscript: React.MutableRefObject<ITranscript[]> }) => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const tempPrimaryUser = transcript[0]?.uid;
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -35,7 +36,7 @@ export const TranscriptPanel = ({ transcript, currentUserId, completeTranscript 
 
       <div className="messages-container">
         {transcript.map((message, index) => (
-          <TranscriptText key={index} message={message} currentUserId={currentUserId} />
+          <TranscriptText key={index} message={message} currentUserId={userDataStore.isSelfRecorder ? tempPrimaryUser : currentUserId} />
         ))}
         <div ref={messagesEndRef} />
       </div>
