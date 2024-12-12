@@ -66,7 +66,7 @@ export const AdvSettingComponent = ({
                                 }}
                                 className="slider"
                             />
-                            <span>{userVolume} Orignal Volume</span>
+                            <span>{userVolume} Original Volume</span>
                         </div>
 
 
