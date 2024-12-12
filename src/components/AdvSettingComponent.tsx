@@ -85,7 +85,7 @@ export const AdvSettingComponent = ({
                                     });
                                 }}
                             />
-                            Auto Adjust Orignal Volume
+                            Auto Adjust Original Volume
                         </div>
                         <div className="auto-volume-checkbox-container">
                             <input
