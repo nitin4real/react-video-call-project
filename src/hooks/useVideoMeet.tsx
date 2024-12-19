@@ -1,4 +1,4 @@
-import AgoraRTC, { IAgoraRTCRemoteUser, IDataChannelConfig } from "agora-rtc-react";
+import AgoraRTC, { IAgoraRTCRemoteUser, IDataChannelConfig, IMicrophoneAudioTrack } from "agora-rtc-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ENPOINTS } from "../constants/apiEndpoints";
@@ -8,6 +8,7 @@ import { userDataStore } from "../store/UserDataStore";
 import { getBotData } from "../utils/botCode";
 import { testingConfigs } from "../configs/testingConfigs";
 import { strings } from "../contants/strings";
+import { AIDenoiserExtension, IAIDenoiserProcessor } from "agora-extension-ai-denoiser";
 
 export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
@@ -29,6 +30,9 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         dynamicVolume: false,
         isTranslationActive: true
     })
+    const [localMicrophoneTrack, setLocalMicrophoneTrack] = useState<IMicrophoneAudioTrack>()
+    const extension = useRef(new AIDenoiserExtension({ assetsPath: '' }));
+    const processor = useRef<IAIDenoiserProcessor>();
 
     const updateVolume = useCallback((updatedConfig: TranslationConfigs) => {
         if (translationConfigRef.current.dynamicVolume !== updatedConfig.dynamicVolume) {
@@ -379,7 +383,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 //     onTranslationRecived
                 // )
             }
-            setVideoStatus(true);
+            // setVideoStatus(true);
             setAudioStatus(true);
         }
         return () => { };
@@ -396,14 +400,53 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 (track) => {
                     addAudioTrackToMap(Number(config.uid), track);
                     videoController.setAudioStatus(true, track);
+                    setLocalMicrophoneTrack(track)
                 }
             ).catch(e => console.log('errrr'));
             // voice2voiceTranslator.unmute()
         } else {
             // voice2voiceTranslator.mute()
+            setLocalMicrophoneTrack(undefined)
             removeAudioTrackFromMap(Number(config.uid));
         }
     };
+    // console.error("testingainslogs", "Processor created", extension);
+
+    useEffect(() => {
+        const extension = new AIDenoiserExtension({ assetsPath: '' });
+        const initializeAIDenoiserProcessor = async () => {
+            AgoraRTC.registerExtensions([extension]);
+            if (extension.checkCompatibility && !extension.checkCompatibility()) {
+                console.error("Does not support AI Denoiser!");
+                return;
+            }
+            if (localMicrophoneTrack) {
+                try {
+                    processor.current = extension.createProcessor();
+                    localMicrophoneTrack.pipe(processor.current).pipe(localMicrophoneTrack.processorDestination);
+                    await processor.current.enable();
+                } catch (error) {
+                    console.error("Error applying noise reduction:");
+                }
+            }
+        };
+
+        void initializeAIDenoiserProcessor();
+
+        return () => {
+            const disableAIDenoiser = async () => {
+                try {
+                    processor.current?.unpipe();
+                    localMicrophoneTrack?.unpipe();
+                    await processor.current?.disable();
+                } catch (error) {
+                    console.error("testingainslogs", "Error disabling noise reduction:", error);
+                }
+            };
+            void disableAIDenoiser();
+        };
+    }, [localMicrophoneTrack]);
+
 
     const setVideoStatus = (state: boolean) => {
         if (isSelfRecorder) {
