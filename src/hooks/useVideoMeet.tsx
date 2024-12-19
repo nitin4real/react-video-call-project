@@ -383,7 +383,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 //     onTranslationRecived
                 // )
             }
-            // setVideoStatus(true);
+            setVideoStatus(true);
             setAudioStatus(true);
         }
         return () => { };
