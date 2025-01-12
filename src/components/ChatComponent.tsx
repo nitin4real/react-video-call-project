@@ -110,7 +110,7 @@ export const ChatComponent = ({ config, userIdList }: { config: IChatConnectionC
             <div ref={messagesEndRef} />
           </div>
       }
-      <div className="input-container">
+      <div className="input-container input-container-chat">
         <input
           type="text"
           value={input}

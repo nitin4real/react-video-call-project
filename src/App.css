@@ -528,11 +528,11 @@ body {
 .input-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: left;
   justify-content: center;
 }
 
-.input-container input{
+.input-container-chat input{
   width: 70%;
   margin: 15px;
 }
