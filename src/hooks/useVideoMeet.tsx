@@ -10,7 +10,7 @@ import { testingConfigs } from "../configs/testingConfigs";
 import { strings } from "../contants/strings";
 import { AIDenoiserExtension, IAIDenoiserProcessor } from "agora-extension-ai-denoiser";
 
-export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void) => {
+export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void, updateUserList: (userId: string, add: boolean) => void) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
     const [currentSpeakerUid, setCurrentSpeakerUid] = useState<Number>(-1);
     const [uidPlayerMap, setUidPlayerMap] = useState<IUidPlayerMapItem[]>([]);
@@ -89,6 +89,9 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     }
 
     const pushInUidPlayerMap = (uid: Number) => {
+        if (String(uid).length === 4 && uid !== Number(config.uid)) {
+            updateUserList(String(uid), true)
+        }
         setUidPlayerMap((currentMap) => {
             return [
                 ...currentMap,
@@ -103,6 +106,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     };
 
     const removeUserFromMap = (uid: Number) => {
+        updateUserList(String(uid), false)
         setUidPlayerMap((currentMap) => {
             return currentMap.filter((value) => {
                 return value.uid != uid;

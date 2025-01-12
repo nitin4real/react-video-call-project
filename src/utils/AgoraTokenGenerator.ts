@@ -28,9 +28,12 @@ class AgoraTokenHelper {
                 appId: "",
                 tokens: {
                     rtmToken: "",
-                    rtcToken: ""
+                    rtcToken: "",
+                    chatToken: "",
+                    chatRoomId: "",
                 },
-                uid: ""
+                uid: "",
+                appkey: ""
             })
         }
 

@@ -13,12 +13,14 @@ import { strings } from "../contants/strings";
 
 const useMeet = () => {
     const [tokensRetrivedStatus, setTokenStatus] = useState<SetupState>('loading');
+    const [showChat, setShowChat] = useState(false)
     const location = useLocation()
     const pathValues = location.pathname.split('/')
     const language = pathValues[pathValues.length - 1]
     const channelName = pathValues[pathValues.length - 2]
     let username: string = String(localStorage.getItem('username'))
     const isRecorder = location.search.split('=')[1] === 'recorder'
+    const [userIdList, setUserIdList] = useState<string[]>([])
     const disconnectAllConnections = () => {
         videoController.resetController()
         chatController.resetController()
@@ -36,7 +38,9 @@ const useMeet = () => {
         uid: "",
         token: "",
         appId: "",
-        channelName: ""
+        channelName: "",
+        chatRoomId: "",
+        appkey: ""
     })
 
     while (!username) {
@@ -55,16 +59,19 @@ const useMeet = () => {
 
         chatConfig.current = {
             appId: response.appId,
-            token: response.tokens.rtmToken,
+            // token: response.tokens.rtmToken,
+            token: response.tokens.chatToken,
             uid: response.uid,
-            channelName
+            channelName,
+            chatRoomId: response.tokens.chatRoomId,
+            appkey: response.appkey
         }
-        if(response.uid === strings.recorderID){
+        if (response.uid === strings.recorderID) {
             userDataStore.setIsRecorder(true)
         } else {
             userDataStore.setChannelName(channelName)
             userDataStore.setCurrentUserName(String(username))
-            userDataStore.registerUser(String(response.uid),channelName)
+            userDataStore.registerUser(String(response.uid), channelName)
         }
         console.log('got the new tokens')
         setTokenStatus(status)
@@ -74,12 +81,24 @@ const useMeet = () => {
         if (tokensRetrivedStatus === 'loading') {
             try {
                 console.log('getting the new tokens')
-                tokenGenerator.GenerateTokenForUserID(username, channelName, language,isRecorder, onComplete)
+                tokenGenerator.GenerateTokenForUserID(username, channelName, language, isRecorder, onComplete)
             } catch (e) {
                 console.log("Error in generating tokens")
             }
         }
     }, [tokensRetrivedStatus])
+
+    const updateUserList = (userId: string, active: boolean) => {
+        if (active) {
+            if (userIdList.includes(userId)) return
+            setUserIdList((currentList) => [...currentList, userId])
+        } else {
+            setUserIdList((currentList) => currentList.filter((id) => id !== userId))
+        }
+    }
+    const toggleShowChat = () => {
+        setShowChat((current) => !current)
+    }
 
     return {
         channelName,
@@ -87,12 +106,16 @@ const useMeet = () => {
         tokensRetrivedStatus,
         videoConfig: videoConfig.current,
         chatConfig: chatConfig.current,
-        disconnectAllConnections
+        disconnectAllConnections,
+        updateUserList,
+        userIdList,
+        showChat,
+        toggleShowChat
     }
 }
 
 export const MeetScreen = () => {
-    const { tokensRetrivedStatus, videoConfig, chatConfig, disconnectAllConnections } = useMeet()
+    const { tokensRetrivedStatus, videoConfig, chatConfig, disconnectAllConnections, updateUserList, userIdList, showChat, toggleShowChat } = useMeet()
 
     if (tokensRetrivedStatus === 'loading') {
         console.log('onloading - meetscreen')
@@ -100,14 +123,16 @@ export const MeetScreen = () => {
     } else if (tokensRetrivedStatus === 'error') {
         return <ErrorComponent message="Error in joining meet. Please try again" />
     }
-    console.log('onsucess - meetscreen')
 
     return <div className="full-screen-container">
         <div className="video-pane">
-            <VideoMeet onDisconnect={disconnectAllConnections} config={videoConfig} />
+            <VideoMeet onDisconnect={disconnectAllConnections} config={videoConfig} updateUserList={updateUserList} toggleShowChat={toggleShowChat} showChat={showChat} />
         </div>
-        {/* <div className="right-pane">
-            <ChatComponent config={chatConfig} />
-        </div> */}
+        {
+            showChat &&
+            <div className="right-pane">
+                <ChatComponent config={chatConfig} userIdList={userIdList} />
+            </div>
+        }
     </div>
 }

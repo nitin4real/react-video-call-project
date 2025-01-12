@@ -16,7 +16,19 @@ import { MeetHeader } from "./MeetHeader"
 import { PopupView } from "./PopupView"
 const backgroundImages = [background1, background2, background3, background4, background5]
 
-export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionConfig, onDisconnect: () => void }) => {
+export const VideoMeet = (
+    {  config,
+        onDisconnect,
+        updateUserList,
+        toggleShowChat,
+        showChat
+    }: {
+        config: IVideoConnectionConfig,
+        onDisconnect: () => void,
+        updateUserList: (userId: string, add: boolean) => void,
+        toggleShowChat: () => void,
+        showChat: boolean
+    }) => {
     const { videoSetupState,
         setMeetStatus,
         currentSpeakerUid,
@@ -30,7 +42,7 @@ export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionCo
         popups,
         closePopup,
         addPopup
-    } = useVideoMeet(config, onDisconnect)
+    } = useVideoMeet(config, onDisconnect, updateUserList)
     const [mode, setMode] = useState<'spotlight' | 'grid'>('grid');
     const [showTranscript, setShowTranscript] = useState(false)
     if (videoSetupState === 'loading') {
@@ -67,6 +79,8 @@ export const VideoMeet = ({ config, onDisconnect }: { config: IVideoConnectionCo
                     </div>
                 </div>
                 <MeetControls
+                    showChat={showChat}
+                    toggleShowChat={toggleShowChat}
                     isRecording={isRecording}
                     setMeetStatus={setMeetStatus}
                     mode={mode}

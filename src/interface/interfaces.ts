@@ -1,3 +1,4 @@
+import { AgoraChat } from "agora-chat";
 import { ICameraVideoTrack } from "agora-rtc-react";
 import { IAgoraRTCRemoteUser, IDataChannelConfig, UID } from "agora-rtc-react";
 import { IMicrophoneAudioTrack } from "agora-rtc-sdk-ng";
@@ -6,6 +7,7 @@ export interface IMessage {
     timestamp: Date;
     userId: string;
     text: string;
+    targetUserId?: string;
 }
 
 export type SetupState = 'loading' | 'success' | 'error'
@@ -15,8 +17,11 @@ export interface ITokenResponse {
     tokens: {
         rtmToken: string;
         rtcToken: string;
+        chatToken: string,
+        chatRoomId: string
     };
-    uid: string
+    uid: string,
+    appkey: string
 }
 
 export interface IChatEvent {
@@ -40,6 +45,8 @@ export interface IChatConnectionConfig {
     token: string
     appId: string
     channelName: string
+    chatRoomId: string
+    appkey: string
 }
 interface ISpeaker {
     uid: number
@@ -93,4 +100,18 @@ export interface IPopupItem {
     id:number
     title: string;
     description: string;
+}
+export interface IAgoraChatConnectionConfig {
+    uid: string
+    token: string
+    appId: string
+    channelName: string
+}
+
+
+export interface IChatListeners {
+    onTextMessage: (msg: AgoraChat.TextMsgBody) => void,
+    onAudioMessage: (msg: AgoraChat.AudioMsgBody) => void,
+    onImageMessage: (msg: AgoraChat.ImgMsgBody) => void,
+    onFileMessage: (msg: AgoraChat.FileMsgBody) => void
 }

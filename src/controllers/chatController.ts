@@ -1,4 +1,4 @@
-import { IChatConnectionConfig, IChatMeetListeners, SetupState } from "../interface/interfaces"
+import { IChatConnectionConfig, IChatListeners, IChatMeetListeners, SetupState } from "../interface/interfaces"
 import { ChatModel } from "../models/chatModel"
 
 class ChatController {
@@ -12,7 +12,7 @@ class ChatController {
 
     setupChatWithToken = async ( // token generation should be done in the main meet component
         config: IChatConnectionConfig,
-        listeners: IChatMeetListeners,
+        listeners: IChatListeners,
         onCompleteCallback: (status: SetupState) => void) => {
         if (!this.isControllerAvailable) return
         this.isControllerAvailable = false
@@ -25,19 +25,19 @@ class ChatController {
         this.isControllerAvailable = true
     }
 
-    setUpChat = async (config: IChatConnectionConfig, listeners: IChatMeetListeners) => {
+    setUpChat = async (config: IChatConnectionConfig, listeners: IChatListeners) => {
         this.chatModel = new ChatModel(config)
         try {
-            await this.chatModel.joinChannel(config)
             this.chatModel.setListeners(listeners)
+            await this.chatModel.joinChannel(config)
         } catch (e) {
             console.log('Error in chat Setup')
         }
     }
 
-    sendMessage = async (message: string) => {
+    sendMessage = async (message: string, targetUserId: string) => {
         try {
-            this.chatModel?.sendMessage(message)
+            this.chatModel?.sendMessage(message, targetUserId)
         } catch (e) {
             console.log('Error In sending message')
         }

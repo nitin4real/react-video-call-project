@@ -13,6 +13,7 @@
   flex-grow: 1;
   overflow-y: auto;
   padding: 8px;
+  padding-top: 14px;
   border-bottom: 1px solid #ccc;
 }
 
@@ -516,7 +517,6 @@ input {
   }
 }
 
-
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -528,11 +528,14 @@ body {
 .input-container {
   display: flex;
   flex-direction: column;
-  align-items: left;
+  align-items: center;
   justify-content: center;
 }
 
-
+.input-container input{
+  width: 70%;
+  margin: 15px;
+}
 
 .transcript-pane {
   display: none;
@@ -836,10 +839,88 @@ body {
   .adv-setting-modal-content {
     width: 80%;
   }
+
   .vol-slider-container {
     width: 50%;
   }
+
   .auto-volume-checkbox-container {
     width: 50%;
   }
+}
+
+.chat-send-btn {
+  background-color: #099dfd;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin: 0 10px;
+}
+
+.chat-toggle-btn {
+  background-color: #099dfdA1;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin: 0 10px;
+}
+.chat-toggle-btn-active {
+  background-color: #099dfd;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin: 0 10px;
+}
+
+.chat-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.chat-header h4 {
+  margin-bottom: 5px;
+}
+
+.chat-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-users {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border: 1px solid #ccc;
+  margin: 5px;
+  border-radius: 5px;
+}
+
+.chat-users:hover {
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+.chat-select-user-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  font-size: 1.4rem;
+}
+.chat-send-btn-disabled {
+  background-color: #099dfdA1;
 }

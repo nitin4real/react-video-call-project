@@ -1,66 +1,95 @@
-import AgoraRTM, { RTMClient, RTMConfig } from 'agora-rtm-sdk'
-import { IChatConnectionConfig, IChatMeetListeners } from '../interface/interfaces'
-
+import AC, { AgoraChat } from 'agora-chat';
+import { IChatConnectionConfig, IChatListeners, IChatMeetListeners } from '../interface/interfaces';
 export class ChatModel {
 
-    chatEngine: RTMClient
-    joinedChannelName: string
+    chatConnection: AgoraChat.Connection
+    joinedChannelRoomId: string;
+    isActive: boolean
 
     constructor(config: IChatConnectionConfig) {
-        this.joinedChannelName = config.channelName
-        this.chatEngine = new AgoraRTM.RTM(
-            config.appId,
-            config.uid,
+        this.isActive = false
+        this.joinedChannelRoomId = config.chatRoomId
+        this.chatConnection = new AC.connection(
             {
-                token: config.token,
-                logLevel: 'none',
-            } as RTMConfig
+                appKey: config.appkey
+            } as AgoraChat.ConnectionParameters
         )
     }
 
     resetServices = async () => {
-        try {
-            await this.chatEngine?.unsubscribe(this.joinedChannelName)
-            await this.chatEngine?.logout()
-            this.joinedChannelName = ''
-        } catch (e) {
-            console.log('A Error Occured. (While Leaving Chat Services)')
-        }
+        this.isActive = false
+
     }
 
     joinChannel = async (config: IChatConnectionConfig) => {
-        if (this.joinedChannelName) {
+        this.isActive = false
+        if (this.joinedChannelRoomId) {
             await this.resetServices()
         }
-
         try {
-            await this.chatEngine.login({
-                token: config.token,
+            this.chatConnection.addEventHandler("connection&message", {
+                onConnected: () => {
+                    this.chatConnection.joinChatRoom({
+                        roomId: config.chatRoomId,
+                    })
+                    this.isActive = true
+                },
+                onError: (err) => {
+                    console.log('Error in joining chat room', err)
+                }
             })
-            const subscribeOptions = {
-                withMessage: true,
-                withPresence: true,
-                withMetadata: true,
-                withLock: true,
-            }
-            await this.chatEngine.subscribe(
-                config.channelName,
-                subscribeOptions
-            )
-            this.joinedChannelName = config.channelName
+            await this.chatConnection.open({
+                accessToken: config.token,
+                user: config.uid
+            })
         } catch (e) {
-            console.log('A Error Occured. (While Joining Chat Services).')
+            console.log('A Error Occured. (While Joining Chat Services).', e)
         }
     }
 
-    setListeners = (listeners: IChatMeetListeners) => {
-        this.chatEngine?.on('message', listeners.onMessage)
-        this.chatEngine?.on('pesence', listeners.onPresence)
+    setListeners = (listeners: IChatListeners) => {
+        this.chatConnection.addEventHandler("message", {
+            onTextMessage: (msg) => {
+                listeners.onTextMessage(msg)
+            },
+            onAudioMessage: (msg) => {
+                listeners.onAudioMessage(msg)
+            },
+            onImageMessage: (msg) => {
+                listeners.onImageMessage(msg)
+            },
+            onFileMessage: (msg: AgoraChat.FileMsgBody) => {
+                listeners.onFileMessage(msg)
+            }
+        })
     }
 
-    sendMessage = async (message: string) => {
+    sendMessage = async (message: string, targetUserId: string) => {
+        if (this.isActive === false) {
+            return
+        }
         try {
-            await this.chatEngine?.publish(this.joinedChannelName, message)
+            if (targetUserId) {
+                this.chatConnection.send(
+                    AC.message.create(
+                        {
+                            type: 'txt',
+                            msg: message,
+                            to: targetUserId,
+                            chatType: 'singleChat',
+                        }
+                    ))
+            } else {
+                this.chatConnection.send(
+                    AC.message.create({
+                        type: 'txt',
+                        msg: message,
+                        to: this.joinedChannelRoomId,
+                        chatType: 'chatRoom',
+                    })
+                )
+
+            }
         } catch (e) {
             console.log('Error Occured while sending message')
         }
