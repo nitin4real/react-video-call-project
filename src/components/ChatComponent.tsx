@@ -1,4 +1,6 @@
 import { useState } from "react";
+import AC, { AgoraChat } from 'agora-chat';
+
 import { chatController } from "../controllers/chatController";
 import { useChat } from "../hooks/useChat";
 import {
@@ -9,6 +11,9 @@ import { ChatMessage } from "./ChatMessage";
 import { ErrorComponent } from "./ErrorComponent";
 import Loader from "./Loader";
 import { userDataStore } from "../store/UserDataStore";
+import { getFileType } from "../utils/appUtils";
+import attachIcon from "../images/attach.svg";
+import removeIcon from "../images/remove.png";
 
 export const ChatComponent = ({ config, userIdList }: { config: IChatConnectionConfig, userIdList: string[] }) => {
 
@@ -25,27 +30,60 @@ export const ChatComponent = ({ config, userIdList }: { config: IChatConnectionC
     updateSingleUserList
   } = useChat(config)
 
-  const [input, setInput] = useState('');
+  const [inputText, setInputText] = useState('');
+  const [inputFile, setInputFile] = useState<AgoraChat.FileObj | undefined>(undefined);
 
   const handleInputChange = (e: any) => {
-    setInput(e.target.value);
+    setInputText(e.target.value);
   };
 
+  const handleInputFileChange = (e: any) => {
+    var input: HTMLInputElement = document.getElementById('uploader') as any
+    var file = AC.utils.getFileUrl(input);
+    if(file.filetype){
+      setInputFile(file);
+    }
+
+  }
+
   const handleSendMessage = () => {
-    if (input.trim()) {
-      const newMessage = {
-        text: input,
+    if (inputFile) {
+      const fileExt = inputFile.filetype
+      const fileType = getFileType(fileExt)
+      const newMessage: IMessage = {
+        file: inputFile,
         timestamp: new Date(),
         userId: config.uid,
-        targetUserId: selectedUser
-      } as IMessage
-      chatController.sendMessage(input, selectedUser)
+        targetUserId: selectedUser,
+        text: inputFile.filename,
+        type: fileType,
+        fileUrl: inputFile.url
+      }
+
+      console.log('newMessage', newMessage)
+      chatController.sendFile(inputFile, selectedUser)
       if (isRoomChat) {
         setMessagesList((currentMessageList) => [...currentMessageList, newMessage]);
       } else {
         updateSingleUserList(newMessage);
       }
-      setInput('');
+      setInputFile(undefined);
+    }
+    if (inputText.trim()) {
+      const newMessage: IMessage = {
+        text: inputText,
+        timestamp: new Date(),
+        userId: config.uid,
+        targetUserId: selectedUser,
+        type: "text"
+      }
+      chatController.sendMessage(inputText, selectedUser)
+      if (isRoomChat) {
+        setMessagesList((currentMessageList) => [...currentMessageList, newMessage]);
+      } else {
+        updateSingleUserList(newMessage);
+      }
+      setInputText('');
     }
   };
 
@@ -56,6 +94,11 @@ export const ChatComponent = ({ config, userIdList }: { config: IChatConnectionC
       }
       handleSendMessage()
     }
+  }
+  const resetSelectedFile = ()=>{
+    setInputFile(undefined)
+    var input: HTMLInputElement = document.getElementById('uploader') as any
+    input.value = ''
   }
 
   if (chatSetupState === 'loading') {
@@ -111,19 +154,36 @@ export const ChatComponent = ({ config, userIdList }: { config: IChatConnectionC
           </div>
       }
       <div className="input-container input-container-chat">
+        {
+          inputFile
+            ? <div className="file-selected">
+              <span className="file-selected-name">{inputFile.filename}</span>
+              <button className="cancel-file" onClick={resetSelectedFile}>
+                <img src={removeIcon} height={25} width={25} alt="remove" className="remove-icon" />
+              </button>
+            </div>
+            : <></>
+        }
         <input
           type="text"
-          value={input}
+          value={inputText}
           disabled={!(isRoomChat || selectedUser)}
           onKeyDown={handleKeyPress}
           onChange={handleInputChange}
           placeholder="Type your message"
         />
-        <button
-          disabled={!(isRoomChat || selectedUser)}
-          className={!(isRoomChat || selectedUser) ? "chat-send-btn chat-send-btn-disabled" : "chat-send-btn"} onClick={handleSendMessage}>
-          Send
-        </button>
+        <div className="input-actions">
+          <label htmlFor="uploader">
+            <img src={attachIcon} height={30} width={30} alt="attach" className="attach-icon" />
+          </label>
+          <input type="file" id="uploader" onChange={handleInputFileChange} style={{ display: 'none' }} />
+
+          <button
+            disabled={!(isRoomChat || selectedUser)}
+            className={!(isRoomChat || selectedUser) ? "chat-send-btn chat-send-btn-disabled" : "chat-send-btn"} onClick={handleSendMessage}>
+            Send
+          </button>
+        </div>
       </div>
     </div>
   );

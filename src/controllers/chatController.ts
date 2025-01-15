@@ -1,3 +1,4 @@
+import { AgoraChat } from "agora-chat"
 import { IChatConnectionConfig, IChatListeners, IChatMeetListeners, SetupState } from "../interface/interfaces"
 import { ChatModel } from "../models/chatModel"
 
@@ -40,6 +41,14 @@ class ChatController {
             this.chatModel?.sendMessage(message, targetUserId)
         } catch (e) {
             console.log('Error In sending message')
+        }
+    }
+
+    sendFile = async (file: AgoraChat.FileObj, targetUserId: string) => {
+        try {
+            this.chatModel?.sendFiles(file, targetUserId)
+        } catch (e) {
+            console.log('Error In sending file')
         }
     }
 }

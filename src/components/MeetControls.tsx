@@ -5,6 +5,8 @@ import mute from '../images/mute.png'
 import unmute from '../images/record.png'
 import chaton from '../images/chat-on.png'
 import chatoff from '../images/chat-off.png'
+import ccon from '../images/cc-on.png'
+import ccoff from '../images/cc-off.png'
 import recActive from '../images/rec_active.png'
 import recDeactive from '../images/rec_deactive.png'
 import { InfoComponent } from "./Info";
@@ -65,7 +67,7 @@ const RecordMeetingComponent = ({
     )
 }
 
-export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectClick, updateCurrentVolume, currentVolume, isRecording, addPopup, toggleShowChat, showChat }: {
+export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectClick, updateCurrentVolume, currentVolume, isRecording, addPopup, toggleShowChat, showChat, showTranscript, toggleTranscription }: {
     setMeetStatus: (type: 'audio' | 'video', value: boolean) => void,
     setMode: (mode: 'spotlight' | 'grid') => void,
     mode: 'spotlight' | 'grid',
@@ -75,7 +77,10 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
     isRecording: boolean,
     addPopup: (popup: IPopupItem) => void,
     toggleShowChat: () => void,
-    showChat: boolean
+    showChat: boolean,
+    toggleTranscription: () => void,
+    showTranscript: boolean
+
 }) => {
     const [audio, setAudio] = useState<'on' | 'off'>('on');
     const [video, setVideo] = useState<'on' | 'off'>('on');
@@ -84,6 +89,7 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
     const camaraImage = video === 'on' ? videoOn : videoOff
     const isVideoOn = video === 'on' ? true : false
     const chatIcon = showChat ? chaton : chatoff
+    const ccIcon = showTranscript ? ccoff : ccon
 
     const handleAudioClick = () => {
         if (audio === 'off') {
@@ -121,6 +127,9 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
             </button>
             <button onClick={handleVideoClick} className="round-btn">
                 <img height={isVideoOn ? 40 : 30} width={isVideoOn ? 40 : 30} src={camaraImage} alt="Video" />
+            </button>
+            <button onClick={toggleTranscription} className="round-btn">
+                <img height={30} width={30} src={ccIcon} alt="cc" />
             </button>
             <button onClick={toggleShowChat} className="round-btn">
                 <img height={30} width={30} src={chatIcon} alt="Chat" />

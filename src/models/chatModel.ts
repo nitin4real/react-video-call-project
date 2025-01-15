@@ -1,5 +1,6 @@
 import AC, { AgoraChat } from 'agora-chat';
 import { IChatConnectionConfig, IChatListeners, IChatMeetListeners } from '../interface/interfaces';
+import { getFileType } from '../utils/appUtils';
 export class ChatModel {
 
     chatConnection: AgoraChat.Connection
@@ -94,6 +95,26 @@ export class ChatModel {
             console.log('Error Occured while sending message')
         }
     }
+
+    sendFiles = async (file: AgoraChat.FileObj, targetUserId: string) => {
+        if (this.isActive === false) {
+            return
+        }
+        try {
+            const fileExt = file.filetype
+            const fileType = getFileType(fileExt)
+            this.chatConnection.send(
+                AC.message.create(
+                    {
+                        type: fileType,
+                        file: file,
+                        to: targetUserId ? targetUserId : this.joinedChannelRoomId,
+                        chatType: targetUserId ? 'singleChat' : 'chatRoom',
+                        filename: file.filename
+                    }
+                ))
+        } catch (e) {
+            console.log('Error Occured while sending message')
+        }
+    }
 }
-
-

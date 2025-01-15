@@ -44,7 +44,8 @@ export const VideoMeet = (
         addPopup
     } = useVideoMeet(config, onDisconnect, updateUserList)
     const [mode, setMode] = useState<'spotlight' | 'grid'>('grid');
-    const [showTranscript, setShowTranscript] = useState(false)
+    const [showTranscript, setShowTranscript] = useState(true)
+    const toggleTranscription = () => setShowTranscript(!showTranscript)
     if (videoSetupState === 'loading') {
         return <Loader />
     } else if (videoSetupState === 'error') {
@@ -86,13 +87,19 @@ export const VideoMeet = (
                     mode={mode}
                     currentVolume={currentVolume}
                     setMode={setMode}
+                    showTranscript={showTranscript}
+                    toggleTranscription={toggleTranscription}
                     addPopup={addPopup}
                     handleDisconnectClick={handleDisconnectClick}
                     updateCurrentVolume={updateCurrentVolume} />
             </div>
-            <div className="transcript-pane">
-                <TranscriptPanel transcript={transcript} currentUserId={String(config.uid)} completeTranscript={completeTranscript} />
-            </div>
+            {
+                showTranscript
+                    ? <div className="transcript-pane">
+                        <TranscriptPanel transcript={transcript} currentUserId={String(config.uid)} completeTranscript={completeTranscript} />
+                    </div>
+                    : <> </>
+            }
         </>
 
     );

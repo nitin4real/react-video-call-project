@@ -8,6 +8,9 @@ export interface IMessage {
     userId: string;
     text: string;
     targetUserId?: string;
+    type: "text" | "audio" | "img" | "file"
+    file?: AgoraChat.FileObj | AgoraChat.ImgMsgBody | AgoraChat.AudioMsgBody | AgoraChat.FileMsgBody,
+    fileUrl?: string
 }
 
 export type SetupState = 'loading' | 'success' | 'error'

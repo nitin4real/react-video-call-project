@@ -26,7 +26,6 @@ export const useChat = (config: IChatConnectionConfig) => {
   };
 
   const updateSingleUserList = (newMessage: IMessage) => {
-    console.log('asdfasdfasdasdfasdf', '1', newMessage)
     setUserMessages((currentMessages) => {
       const userId = newMessage?.targetUserId || newMessage.userId;
       const prevMessages = currentMessages[userId] || [];
@@ -42,7 +41,8 @@ export const useChat = (config: IChatConnectionConfig) => {
       const newMessage: IMessage = {
         text: msg.msg,
         timestamp: new Date(),
-        userId: msg?.from || ''
+        userId: msg?.from || '',
+        type: 'text'
       }
       if (msg.chatType === 'chatRoom') {
         updateMessageList(newMessage);
@@ -51,13 +51,49 @@ export const useChat = (config: IChatConnectionConfig) => {
       }
     },
     onAudioMessage: (msg: AgoraChat.AudioMsgBody) => {
-
+      const newMessage: IMessage = {
+        file: msg.file,
+        timestamp: new Date(),
+        userId: msg?.from || '',
+        type: 'audio',
+        text: msg?.filename,
+        fileUrl: msg.url
+      }
+      if (msg.chatType === 'chatRoom') {
+        updateMessageList(newMessage);
+      } else {
+        updateSingleUserList(newMessage);
+      }
     },
     onImageMessage: (msg: AgoraChat.ImgMsgBody) => {
-
+      const newMessage: IMessage = {
+        file: msg.file,
+        timestamp: new Date(),
+        userId: msg?.from || '',
+        type: 'img',
+        text: "",
+        fileUrl: msg.url
+      }
+      if (msg.chatType === 'chatRoom') {
+        updateMessageList(newMessage);
+      } else {
+        updateSingleUserList(newMessage);
+      }
     },
     onFileMessage: (msg: AgoraChat.FileMsgBody) => {
-
+      const newMessage: IMessage = {
+        file: msg.file,
+        timestamp: new Date(),
+        userId: msg?.from || '',
+        type: 'file',
+        text: msg?.filename || "",
+        fileUrl: msg.url
+      }
+      if (msg.chatType === 'chatRoom') {
+        updateMessageList(newMessage);
+      } else {
+        updateSingleUserList(newMessage);
+      }
     }
   });
 

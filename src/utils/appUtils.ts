@@ -15,3 +15,19 @@ export function formatTimeToHHMM(time: Date) {
 
   return `${hours}:${minutes}`;
 }
+
+export function getFileType(fileType: string): 'audio' | 'img' | 'file' {
+  switch (fileType) {
+    case 'mp3':
+    case 'amr':
+    case 'wmv':
+      return 'audio';
+    case 'jpg':
+    case 'gif':
+    case 'png':
+    case 'bmp':
+      return 'img';
+    default:
+      return 'file';
+  }
+}
