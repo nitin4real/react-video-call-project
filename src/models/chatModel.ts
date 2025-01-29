@@ -80,10 +80,10 @@ export class ChatModel {
                 } catch (e) {
                     console.error( 'Error in translating message', e)
                 }
-                if(translatedMessage.text === ''){
+                if(!translatedMessage.text){
                     translatedMessage.text = msg.msg
                 }
-                if(translatedMessage.srcLanguage === ''){
+                if(!translatedMessage.srcLanguage){
                     translatedMessage.srcLanguage = 'en'
                 }
                 listeners.onTextMessage(msg, translatedMessage)
