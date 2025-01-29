@@ -9,6 +9,8 @@ import ccon from '../images/cc-on.png'
 import ccoff from '../images/cc-off.png'
 import recActive from '../images/rec_active.png'
 import recDeactive from '../images/rec_deactive.png'
+import noiseOn from '../images/noise-on.png'
+import noiseOff from '../images/noise-off.png'
 import { InfoComponent } from "./Info";
 import { AdvSettingComponent } from "./AdvSettingComponent";
 import { IPopupItem, TranslationConfigs } from "../interface/interfaces";
@@ -67,7 +69,7 @@ const RecordMeetingComponent = ({
     )
 }
 
-export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectClick, updateCurrentVolume, currentVolume, isRecording, addPopup, toggleShowChat, showChat, showTranscript, toggleTranscription }: {
+export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectClick, updateCurrentVolume, currentVolume, isRecording, addPopup, toggleShowChat, showChat, showTranscript, toggleTranscription, activeAIDenoiser, setActiveAIDenoiser }: {
     setMeetStatus: (type: 'audio' | 'video', value: boolean) => void,
     setMode: (mode: 'spotlight' | 'grid') => void,
     mode: 'spotlight' | 'grid',
@@ -79,7 +81,9 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
     toggleShowChat: () => void,
     showChat: boolean,
     toggleTranscription: () => void,
-    showTranscript: boolean
+    showTranscript: boolean,
+    activeAIDenoiser: boolean,
+    setActiveAIDenoiser: (value: boolean) => void
 
 }) => {
     const [audio, setAudio] = useState<'on' | 'off'>('on');
@@ -90,6 +94,7 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
     const isVideoOn = video === 'on' ? true : false
     const chatIcon = showChat ? chaton : chatoff
     const ccIcon = showTranscript ? ccoff : ccon
+    const aiNoiseIcon = activeAIDenoiser ? noiseOff : noiseOn
 
     const handleAudioClick = () => {
         if (audio === 'off') {
@@ -119,20 +124,27 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
         }
     };
 
+    const toggleAIDeoniser = () => {
+        setActiveAIDenoiser(!activeAIDenoiser)
+    }
+
 
     return <div className="control-buttons-wrapper">
         <div className="control-buttons-container">
-            <button onClick={handleAudioClick} className="round-btn">
+            <button title="Mute/Unmute" onClick={handleAudioClick}  className="round-btn">
                 <img height={30} width={30} src={micImage} alt="Audio" />
             </button>
-            <button onClick={handleVideoClick} className="round-btn">
+            <button title="Video On/off" onClick={handleVideoClick} className="round-btn">
                 <img height={isVideoOn ? 40 : 30} width={isVideoOn ? 40 : 30} src={camaraImage} alt="Video" />
             </button>
-            <button onClick={toggleTranscription} className="round-btn">
+            <button title="Show/Hide Transcription" onClick={toggleTranscription} className="round-btn">
                 <img height={30} width={30} src={ccIcon} alt="cc" />
             </button>
-            <button onClick={toggleShowChat} className="round-btn">
+            <button title="Show/Hide Chat" onClick={toggleShowChat} className="round-btn">
                 <img height={30} width={30} src={chatIcon} alt="Chat" />
+            </button>
+            <button title="AI Noise Suppression" onClick={toggleAIDeoniser} className="round-btn">
+                <img height={30} width={30} src={aiNoiseIcon} alt="AINoise" />
             </button>
             <InfoComponent />
             <RecordMeetingComponent addPopup={addPopup} isRecording={isRecording}/>

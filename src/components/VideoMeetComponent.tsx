@@ -41,7 +41,9 @@ export const VideoMeet = (
         isRecording,
         popups,
         closePopup,
-        addPopup
+        addPopup,
+        activeAIDenoiser,
+        setActiveAIDenoiser
     } = useVideoMeet(config, onDisconnect, updateUserList)
     const [mode, setMode] = useState<'spotlight' | 'grid'>('grid');
     const [showTranscript, setShowTranscript] = useState(false)
@@ -81,6 +83,8 @@ export const VideoMeet = (
                 </div>
                 <div className="meet-controls">
                     <MeetControls
+                        activeAIDenoiser={activeAIDenoiser}
+                        setActiveAIDenoiser={setActiveAIDenoiser}
                         showChat={showChat}
                         toggleShowChat={toggleShowChat}
                         isRecording={isRecording}

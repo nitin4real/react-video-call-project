@@ -20,6 +20,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     const [isRecording, setIsRecording] = useState<boolean>(isSelfRecorder)
     const navigate = useNavigate();
     const location = useLocation()
+    const [activeAIDenoiser, setActiveAIDenoiser] = useState<boolean>(false)
     const [popups, setPopups] = useState<IPopupItem[]>([])
     const popupID = useRef<number>(0)
     const audioSuppressionTimers = useRef<AudioSuppresstionTimer[]>([])
@@ -31,7 +32,6 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         isTranslationActive: true
     })
     const [localMicrophoneTrack, setLocalMicrophoneTrack] = useState<IMicrophoneAudioTrack>()
-    const extension = useRef(new AIDenoiserExtension({ assetsPath: '' }));
     const processor = useRef<IAIDenoiserProcessor>();
 
     const updateVolume = useCallback((updatedConfig: TranslationConfigs) => {
@@ -428,7 +428,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 try {
                     processor.current = extension.createProcessor();
                     localMicrophoneTrack.pipe(processor.current).pipe(localMicrophoneTrack.processorDestination);
-                    await processor.current.enable();
+                    // await processor.current.enable();
                 } catch (error) {
                     console.error("Error applying noise reduction:");
                 }
@@ -450,6 +450,14 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             void disableAIDenoiser();
         };
     }, [localMicrophoneTrack]);
+
+    useEffect(() => {
+        if (activeAIDenoiser) {
+            processor.current?.enable();
+        } else {
+            processor.current?.disable();
+        }
+    }, [activeAIDenoiser])
 
 
     const setVideoStatus = (state: boolean) => {
@@ -521,6 +529,8 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         isRecording,
         popups,
         closePopup,
-        addPopup
+        addPopup,
+        activeAIDenoiser,
+        setActiveAIDenoiser
     };
 };
