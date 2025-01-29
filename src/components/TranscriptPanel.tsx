@@ -17,7 +17,7 @@ export const TranscriptPanel = ({ transcript, currentUserId, completeTranscript 
   }, [transcript]);
 
   return (
-    <div className="chat-container">
+    <div className="transcription-container">
       <h4 className="transcript-heading">
         <div>
           Transcript

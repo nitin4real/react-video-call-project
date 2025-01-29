@@ -10,7 +10,8 @@ export interface IMessage {
     targetUserId?: string;
     type: "text" | "audio" | "img" | "file"
     file?: AgoraChat.FileObj | AgoraChat.ImgMsgBody | AgoraChat.AudioMsgBody | AgoraChat.FileMsgBody,
-    fileUrl?: string
+    fileUrl?: string,
+    translatedMessage?: ITranslatedMessage
 }
 
 export type SetupState = 'loading' | 'success' | 'error'
@@ -50,6 +51,7 @@ export interface IChatConnectionConfig {
     channelName: string
     chatRoomId: string
     appkey: string
+    language?: string
 }
 interface ISpeaker {
     uid: number
@@ -100,7 +102,7 @@ export interface TranslationConfigs {
     isTranslationActive: boolean
 }
 export interface IPopupItem {
-    id:number
+    id: number
     title: string;
     description: string;
 }
@@ -111,9 +113,12 @@ export interface IAgoraChatConnectionConfig {
     channelName: string
 }
 
-
+export interface ITranslatedMessage {
+    text: string
+    srcLanguage: string
+}
 export interface IChatListeners {
-    onTextMessage: (msg: AgoraChat.TextMsgBody) => void,
+    onTextMessage: (msg: AgoraChat.TextMsgBody, translatedData: ITranslatedMessage) => void,
     onAudioMessage: (msg: AgoraChat.AudioMsgBody) => void,
     onImageMessage: (msg: AgoraChat.ImgMsgBody) => void,
     onFileMessage: (msg: AgoraChat.FileMsgBody) => void

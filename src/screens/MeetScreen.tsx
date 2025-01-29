@@ -40,7 +40,7 @@ const useMeet = () => {
         appId: "",
         channelName: "",
         chatRoomId: "",
-        appkey: ""
+        appkey: "",
     })
 
     while (!username) {
@@ -64,7 +64,8 @@ const useMeet = () => {
             uid: response.uid,
             channelName,
             chatRoomId: response.tokens.chatRoomId,
-            appkey: response.appkey
+            appkey: response.appkey,
+            language
         }
         if (response.uid === strings.recorderID) {
             userDataStore.setIsRecorder(true)
@@ -129,8 +130,7 @@ export const MeetScreen = () => {
             <VideoMeet onDisconnect={disconnectAllConnections} config={videoConfig} updateUserList={updateUserList} toggleShowChat={toggleShowChat} showChat={showChat} />
         </div>
         {
-            showChat &&
-            <div className="right-pane">
+            <div className="right-pane" style={{ display: showChat ? 'block' : 'none' }}>
                 <ChatComponent config={chatConfig} userIdList={userIdList} />
             </div>
         }

@@ -1,15 +1,18 @@
 import AC, { AgoraChat } from 'agora-chat';
-import { IChatConnectionConfig, IChatListeners, IChatMeetListeners } from '../interface/interfaces';
+import { IChatConnectionConfig, IChatListeners, IChatMeetListeners, ITranslatedMessage } from '../interface/interfaces';
 import { getFileType } from '../utils/appUtils';
+import { getLanguageISOCodeByName } from '../constants/languageCodes';
 export class ChatModel {
 
     chatConnection: AgoraChat.Connection
     joinedChannelRoomId: string;
     isActive: boolean
+    userLanguage?: string
 
     constructor(config: IChatConnectionConfig) {
         this.isActive = false
         this.joinedChannelRoomId = config.chatRoomId
+        this.userLanguage = config.language
         this.chatConnection = new AC.connection(
             {
                 appKey: config.appkey
@@ -50,8 +53,34 @@ export class ChatModel {
 
     setListeners = (listeners: IChatListeners) => {
         this.chatConnection.addEventHandler("message", {
-            onTextMessage: (msg) => {
-                listeners.onTextMessage(msg)
+            onTextMessage: async (msg: AgoraChat.TextMsgBody) => {
+                const translatedMessage: ITranslatedMessage = {
+                    text: '',
+                    srcLanguage: ''
+                }
+                try {
+                    const userLanguage = this.userLanguage ? getLanguageISOCodeByName(this.userLanguage) : this.userLanguage
+                    // if user langauge has a - then split it and get the first part
+                    const translationResponse: any = await this.chatConnection.translateMessage({
+                        text: msg.msg,
+                        languages: [userLanguage ?? 'en']
+                    })
+                    const translation: AgoraChat.TranslationResult = translationResponse?.data[0]
+                    let targetUserLanguage = translation?.detectedLanguage?.language
+                    if (targetUserLanguage && targetUserLanguage.includes('-')) {
+                        targetUserLanguage = targetUserLanguage.split('-')[0]
+                    }
+                    // console.log('TranslationAttempt', 'Translated Message',
+                    //     translation?.translations[0]?.text,
+                    //     targetUserLanguage,
+                    //     userLanguage, this.userLanguage
+                    // )
+                    translatedMessage.text = translation?.translations[0]?.text
+                    translatedMessage.srcLanguage = targetUserLanguage
+                } catch (e) {
+                    console.error( 'Error in translating message', e)
+                }
+                listeners.onTextMessage(msg, translatedMessage)
             },
             onAudioMessage: (msg) => {
                 listeners.onAudioMessage(msg)

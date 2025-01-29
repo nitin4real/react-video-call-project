@@ -17,7 +17,7 @@ import { PopupView } from "./PopupView"
 const backgroundImages = [background1, background2, background3, background4, background5]
 
 export const VideoMeet = (
-    {  config,
+    { config,
         onDisconnect,
         updateUserList,
         toggleShowChat,
@@ -44,7 +44,7 @@ export const VideoMeet = (
         addPopup
     } = useVideoMeet(config, onDisconnect, updateUserList)
     const [mode, setMode] = useState<'spotlight' | 'grid'>('grid');
-    const [showTranscript, setShowTranscript] = useState(true)
+    const [showTranscript, setShowTranscript] = useState(false)
     const toggleTranscription = () => setShowTranscript(!showTranscript)
     if (videoSetupState === 'loading') {
         return <Loader />
@@ -79,19 +79,21 @@ export const VideoMeet = (
                         <GridView uidPlayerMap={uidPlayerMap} currentSpeakerUid={currentSpeakerUid} />
                     </div>
                 </div>
-                <MeetControls
-                    showChat={showChat}
-                    toggleShowChat={toggleShowChat}
-                    isRecording={isRecording}
-                    setMeetStatus={setMeetStatus}
-                    mode={mode}
-                    currentVolume={currentVolume}
-                    setMode={setMode}
-                    showTranscript={showTranscript}
-                    toggleTranscription={toggleTranscription}
-                    addPopup={addPopup}
-                    handleDisconnectClick={handleDisconnectClick}
-                    updateCurrentVolume={updateCurrentVolume} />
+                <div className="meet-controls">
+                    <MeetControls
+                        showChat={showChat}
+                        toggleShowChat={toggleShowChat}
+                        isRecording={isRecording}
+                        setMeetStatus={setMeetStatus}
+                        mode={mode}
+                        currentVolume={currentVolume}
+                        setMode={setMode}
+                        showTranscript={showTranscript}
+                        toggleTranscription={toggleTranscription}
+                        addPopup={addPopup}
+                        handleDisconnectClick={handleDisconnectClick}
+                        updateCurrentVolume={updateCurrentVolume} />
+                </div>
             </div>
             {
                 showTranscript

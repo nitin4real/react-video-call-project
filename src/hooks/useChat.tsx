@@ -4,6 +4,7 @@ import {
   IChatConnectionConfig,
   IChatListeners,
   IMessage,
+  ITranslatedMessage,
   SetupState
 } from "../interface/interfaces";
 import { AgoraChat } from "agora-chat";
@@ -37,12 +38,13 @@ export const useChat = (config: IChatConnectionConfig) => {
   }
 
   const listenersRef = useRef<IChatListeners>({
-    onTextMessage: (msg: AgoraChat.TextMsgBody) => {
+    onTextMessage: (msg: AgoraChat.TextMsgBody, translatedMessage: ITranslatedMessage) => {
       const newMessage: IMessage = {
         text: msg.msg,
         timestamp: new Date(),
         userId: msg?.from || '',
-        type: 'text'
+        type: 'text',
+        translatedMessage: translatedMessage
       }
       if (msg.chatType === 'chatRoom') {
         updateMessageList(newMessage);

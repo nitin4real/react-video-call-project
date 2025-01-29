@@ -1,12 +1,19 @@
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  width: 90%;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 16px;
   background-color: #f9f9f9;
+  height: 92vh;
+  width: 100%;
+  border-left: 1px solid #ccc;
+}
+
+.transcription-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #f9f9f9;
+  height: 92vh;
+  width: 100%;
+  padding: 10px;
 }
 
 .messages-container {
@@ -14,7 +21,6 @@
   overflow-y: auto;
   padding: 8px;
   padding-top: 14px;
-  border-bottom: 1px solid #ccc;
 }
 
 
@@ -148,46 +154,35 @@ video {
   object-fit: contain;
 }
 
-.full-screen-container {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-}
-
 .video-pane {
+  background-color: #f0f0f0;
+  /* Light gray background for visibility */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
   width: 100%;
-  background-color: #f0f0f0;
-  /* Light gray background for visibility */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
 }
 
-
+/* 
 .left-pane {
-  width: 70%;
+  width: 70vw;
   background-color: #f0f0f0;
-  /* Light gray background for visibility */
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2rem;
-}
+} */
 
 .right-pane {
-  width: 30%;
   background-color: #d0d0d0;
-  /* Slightly darker gray background for visibility */
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2rem;
+  height: 92vh;
+  width: 25vw;
 }
-
-
-
 
 .chat-item {
   display: flex;
@@ -539,12 +534,13 @@ body {
 
 .transcript-pane {
   display: none;
-  width: 40%;
-  height: 100%;
+  width: 25vw;
+  height: 92vh;
   background-color: #f0f0f0;
   align-items: center;
   justify-content: center;
   font-size: 2rem;
+  border-left: 1px solid #ccc;
 }
 
 @media (min-width: 768px) {
@@ -629,11 +625,13 @@ body {
 }
 
 .meet-header {
-  align-items: center;
+  width: 100%;
+  background-color: #F9F9F9;
+  border: 1px solid #ccc;
+  border-bottom-width: 0;
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 20px 0 3px 5px;
+  align-items: center;
+  justify-content: space-between;  
 }
 
 .oai-agora-logo {
@@ -973,4 +971,48 @@ body {
   font-size: medium;
   display: flex;
   flex-direction: column;
+}
+
+.message-text-translated {
+  font-size: 0.75rem;
+  color: gray;
+}
+
+
+.empty-chat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 40%;
+}
+
+.empty-chat__text {
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.empty-chat__icon {
+  font-size: 3rem;
+  color: #333;
+  align-items: center;
+  justify-content: center;
+}
+
+.attach-icon {
+  cursor: pointer;
+}
+
+.meet-controls {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+}
+
+.full-screen-container {
+  display: flex;
+  width: 100vw;
+  height: 92vh;
+  overflow: hidden;
+  border: 1px solid #ccc;
 }

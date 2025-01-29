@@ -14,6 +14,7 @@ import { userDataStore } from "../store/UserDataStore";
 import { getFileType } from "../utils/appUtils";
 import attachIcon from "../images/attach.svg";
 import removeIcon from "../images/remove.png";
+import { EmptyChat } from "./EmptyChat";
 
 export const ChatComponent = ({ config, userIdList }: { config: IChatConnectionConfig, userIdList: string[] }) => {
 
@@ -40,7 +41,7 @@ export const ChatComponent = ({ config, userIdList }: { config: IChatConnectionC
   const handleInputFileChange = (e: any) => {
     var input: HTMLInputElement = document.getElementById('uploader') as any
     var file = AC.utils.getFileUrl(input);
-    if(file.filetype){
+    if (file.filetype) {
       setInputFile(file);
     }
 
@@ -60,7 +61,6 @@ export const ChatComponent = ({ config, userIdList }: { config: IChatConnectionC
         fileUrl: inputFile.url
       }
 
-      console.log('newMessage', newMessage)
       chatController.sendFile(inputFile, selectedUser)
       if (isRoomChat) {
         setMessagesList((currentMessageList) => [...currentMessageList, newMessage]);
@@ -95,7 +95,7 @@ export const ChatComponent = ({ config, userIdList }: { config: IChatConnectionC
       handleSendMessage()
     }
   }
-  const resetSelectedFile = ()=>{
+  const resetSelectedFile = () => {
     setInputFile(undefined)
     var input: HTMLInputElement = document.getElementById('uploader') as any
     input.value = ''
@@ -132,24 +132,29 @@ export const ChatComponent = ({ config, userIdList }: { config: IChatConnectionC
       </div>
       {isRoomChat ?
         <div className="messages-container">
-          {roomChat.map((message, index) => (
-            <ChatMessage key={index} message={message} currentUserId={config.uid} />
-          ))}
+          {roomChat.length === 0 ? <EmptyChat message="Messages Will appear here" />
+            : roomChat.map((message, index) => (
+              <ChatMessage key={index} message={message} currentUserId={config.uid} />
+            ))}
           <div ref={messagesEndRef} />
         </div>
         : selectedUser ?
           <div className="messages-container">
             <div className="chat-select-user-header"> Private Chat with {userDataStore.getUserName(selectedUser) || selectedUser} </div>
             {
-              singleUserMessages[selectedUser]?.map((message, index) => (
-                <ChatMessage key={index} message={message} currentUserId={config.uid} />
-              ))
+              singleUserMessages[selectedUser]?.length === 0 || singleUserMessages[selectedUser] === undefined
+                ? <EmptyChat message="Messages Will appear here" />
+                : singleUserMessages[selectedUser]?.map((message, index) => (
+                  <ChatMessage key={index} message={message} currentUserId={config.uid} />
+                ))
             }
           </div> : <div className="messages-container">
             <div className="chat-select-user-header"> Select a user to chat </div>
-            {userIdList.map((user, index) => (
-              <div className="chat-users" key={index} onClick={() => setSelectedUser(user)}>{userDataStore.getUserName(user) || user}</div>
-            ))}
+            {
+              userIdList.length === 0 ? <EmptyChat message="No Users in the chat room" /> :
+                userIdList.map((user, index) => (
+                  <div className="chat-users" key={index} onClick={() => setSelectedUser(user)}>{userDataStore.getUserName(user) || user}</div>
+                ))}
             <div ref={messagesEndRef} />
           </div>
       }
@@ -173,10 +178,10 @@ export const ChatComponent = ({ config, userIdList }: { config: IChatConnectionC
           placeholder="Type your message"
         />
         <div className="input-actions">
-          <label htmlFor="uploader">
+          <label className="attach-icon" htmlFor="uploader">
             <img src={attachIcon} height={30} width={30} alt="attach" className="attach-icon" />
           </label>
-          <input type="file" id="uploader" onChange={handleInputFileChange} style={{ display: 'none' }} />
+          <input type="file" id="uploader" disabled={!(isRoomChat || selectedUser)} onChange={handleInputFileChange} style={{ display: 'none' }} />
 
           <button
             disabled={!(isRoomChat || selectedUser)}

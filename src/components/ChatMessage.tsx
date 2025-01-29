@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { IMessage } from "../interface/interfaces";
 import { userDataStore } from "../store/UserDataStore";
+import { getLanguageNameByISOCode } from "../constants/languageCodes";
 
 const AudioMessage = ({ togglePlayback, message, isPlayingAudio }: { togglePlayback: () => void, message: IMessage, isPlayingAudio: boolean }) => {
   const audioIcon = <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M8 4v10.184A3 3 0 0 0 7 14a3 3 0 1 0 3 3V7h7v4.184A3 3 0 0 0 16 11a3 3 0 1 0 3 3V4z" /></svg>
@@ -28,6 +29,7 @@ export const ChatMessage = ({ message, currentUserId }: { message: IMessage, cur
   const isAudio = message.type === 'audio';
   const imgIcon = <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h14q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21zm0-2h14V5H5zm1-2h12l-3.75-5l-3 4L9 13zm-1 2V5z" /></svg>
   const fileIcon = <svg width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M13 9V3.5L18.5 9M6 2c-1.11 0-2 .89-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" /></svg>
+  const orignalLanguage = getLanguageNameByISOCode(message.translatedMessage?.srcLanguage || '')
   useEffect(() => {
     if (isAudio && audioRef.current === null) {
       audioRef.current = new Audio(message.fileUrl)
@@ -42,13 +44,13 @@ export const ChatMessage = ({ message, currentUserId }: { message: IMessage, cur
     }
     setIsPlayingAudio((prev) => !prev);
   }
-
-
   return (
     <div className={`chat-item ${isCurrentUser ? 'current-user' : ''}`}>
       {
         isText
-          ? <div className="message-text">{message.text}</div>
+          ? <div className="message-text">
+            {isCurrentUser ? message.text : message.translatedMessage?.text}
+          </div>
           : isFile ? <a href={message.fileUrl} target="_blank">
             <div className="message-text">{fileIcon} </div>
             <div className="message-text">{message.text || 'File'}</div>
@@ -64,6 +66,9 @@ export const ChatMessage = ({ message, currentUserId }: { message: IMessage, cur
       }
       <div className="message-info">
         {isCurrentUser ? <></> : <span className="user-id">send by: {userName}</span>}
+        {isCurrentUser || !message.text ? <></> : <div className="message-text-translated">
+          {orignalLanguage}{': '}{message.text}
+        </div>}
         <div className="timestamp">{formattedTime}</div>
       </div>
     </div>
