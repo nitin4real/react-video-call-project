@@ -27,7 +27,7 @@ const RecordMeetingComponent = ({
     isRecording,
     addPopup
 }: {
-    isRecording: boolean, 
+    isRecording: boolean,
     addPopup: (popup: IPopupItem) => void
 }) => {
     return (
@@ -92,9 +92,9 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
     const micImage = audio === 'on' ? unmute : mute
     const camaraImage = video === 'on' ? videoOn : videoOff
     const isVideoOn = video === 'on' ? true : false
-    const chatIcon = showChat ? chaton : chatoff
-    const ccIcon = showTranscript ? ccoff : ccon
-    const aiNoiseIcon = activeAIDenoiser ? noiseOff : noiseOn
+    const chatIcon = showChat ? chatoff : chaton
+    const ccIcon = showTranscript ? ccon : ccoff
+    const aiNoiseIcon = activeAIDenoiser ? noiseOn : noiseOff
 
     const handleAudioClick = () => {
         if (audio === 'off') {
@@ -128,10 +128,9 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
         setActiveAIDenoiser(!activeAIDenoiser)
     }
 
-
     return <div className="control-buttons-wrapper">
         <div className="control-buttons-container">
-            <button title="Mute/Unmute" onClick={handleAudioClick}  className="round-btn">
+            <button title="Mute/Unmute" onClick={handleAudioClick} className="round-btn">
                 <img height={30} width={30} src={micImage} alt="Audio" />
             </button>
             <button title="Video On/off" onClick={handleVideoClick} className="round-btn">
@@ -143,12 +142,14 @@ export const MeetControls = ({ setMeetStatus, setMode, mode, handleDisconnectCli
             <button title="Show/Hide Chat" onClick={toggleShowChat} className="round-btn">
                 <img height={30} width={30} src={chatIcon} alt="Chat" />
             </button>
-            <button title="AI Noise Suppression" onClick={toggleAIDeoniser} className="round-btn">
+            {/* <button title="AI Noise Suppression" onClick={toggleAIDeoniser} className="round-btn">
                 <img height={30} width={30} src={aiNoiseIcon} alt="AINoise" />
-            </button>
+            </button> */}
             <InfoComponent />
-            <RecordMeetingComponent addPopup={addPopup} isRecording={isRecording}/>
+            <RecordMeetingComponent addPopup={addPopup} isRecording={isRecording} />
             <AdvSettingComponent
+                activeAIDenoiser={activeAIDenoiser}
+                setActiveAIDenoiser={setActiveAIDenoiser}
                 currentVolume={currentVolume}
                 setAudioVolume={updateCurrentVolume} />
             {/* <button onClick={handleStateClick}>Change View to {mode === 'grid' ? 'spotlight' : 'grid'}</button> */}

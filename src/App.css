@@ -181,7 +181,7 @@ video {
   justify-content: center;
   font-size: 2rem;
   height: 92vh;
-  width: 25vw;
+  width: 30vw;
 }
 
 .chat-item {
@@ -534,7 +534,7 @@ body {
 
 .transcript-pane {
   display: none;
-  width: 25vw;
+  width: 30vw;
   height: 92vh;
   background-color: #f0f0f0;
   align-items: center;
@@ -1007,6 +1007,7 @@ body {
   position: absolute;
   width: 100%;
   bottom: 0;
+  padding-bottom: 5px;
 }
 
 .full-screen-container {
@@ -1014,5 +1015,5 @@ body {
   width: 100vw;
   height: 92vh;
   overflow: hidden;
-  border: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
 }

@@ -4,10 +4,14 @@ import { TranslationConfigs } from "../interface/interfaces";
 
 export const AdvSettingComponent = ({
     currentVolume,
-    setAudioVolume
+    setAudioVolume,
+    activeAIDenoiser,
+    setActiveAIDenoiser
 }: {
     currentVolume: React.MutableRefObject<TranslationConfigs>,
-    setAudioVolume: (config: TranslationConfigs) => void
+    setAudioVolume: (config: TranslationConfigs) => void,
+    activeAIDenoiser: boolean,
+    setActiveAIDenoiser: (value: boolean) => void
 }) => {
     const [isAutoVolume, setIsAutoVolume] = useState(currentVolume.current.dynamicVolume);
     const [isTranslationActive, setIsTranslationActive] = useState(currentVolume.current.isTranslationActive);
@@ -103,6 +107,23 @@ export const AdvSettingComponent = ({
                             />
                             Translation Active
                         </div>
+                        <div className="auto-volume-checkbox-container">
+                            <input
+                                className="auto-volume-checkbox"
+                                type="checkbox"
+                                checked={activeAIDenoiser}
+                                onChange={(e) => {
+                                    setActiveAIDenoiser(e.target.checked);
+                                    // e.target.checked ? setUserVolume(currentVolume.current.userVolume) : setUserVolume(100);
+                                    // setAudioVolume({
+                                    //     ...currentVolume.current,
+                                    //     isTranslationActive: e.target.checked,
+                                    // });
+                                }}
+                            />
+                            AI Noise Suppression
+                        </div>
+
                         <button className="info-modal-btn" onClick={toggleModal}>Close</button>
                     </div>
                 </div>

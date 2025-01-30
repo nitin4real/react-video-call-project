@@ -49,6 +49,11 @@ const useMeet = () => {
     }
 
     const onComplete = (status: SetupState, response: ITokenResponse) => {
+        if (response.tokens.rtcToken === '' || response.tokens.chatToken === '' || response.appId === '') {
+            console.error('Error in getting tokens')
+            setTokenStatus('error')
+            return
+        }
         videoConfig.current = {
             appId: response.appId,
             token: response.tokens.rtcToken,
@@ -123,7 +128,7 @@ export const MeetScreen = () => {
         return <Loader />
     } else if (tokensRetrivedStatus === 'error') {
         return <ErrorComponent message="Error in joining meet. Please try again" />
-    }
+    }  
 
     return <div className="full-screen-container">
         <div className="video-pane">

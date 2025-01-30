@@ -46,7 +46,7 @@ export const VideoMeet = (
         setActiveAIDenoiser
     } = useVideoMeet(config, onDisconnect, updateUserList)
     const [mode, setMode] = useState<'spotlight' | 'grid'>('grid');
-    const [showTranscript, setShowTranscript] = useState(false)
+    const [showTranscript, setShowTranscript] = useState(true)
     const toggleTranscription = () => setShowTranscript(!showTranscript)
     if (videoSetupState === 'loading') {
         return <Loader />
