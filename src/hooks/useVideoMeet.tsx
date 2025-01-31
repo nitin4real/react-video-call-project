@@ -330,7 +330,8 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                         spokenWords: chatMessage.type === 'response.text.done'
                     })
                 }
-                if ((isSelfRecorder || botData.speakerUID === config.uid) && chatMessage.type === 'response.text.done') {
+                // console.log('type', chatMessage.type, (isSelfRecorder || botData.speakerUID === config.uid) && chatMessage.type === 'response.text.done')
+                if ((isSelfRecorder || botData.targetLangName === config.language) && chatMessage.type === 'response.text.done') {
                     onTranslationRecived(botData.speakerUID, chatMessage.text)
                 } else if ((isSelfRecorder || botData.targetLangName === config.language) && (chatMessage.type === 'response.audio_transcript.done')) {
                     onTranslationRecived(botData.speakerUID, chatMessage.transcript)
