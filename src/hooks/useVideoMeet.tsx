@@ -9,6 +9,7 @@ import { getBotData } from "../utils/botCode";
 import { testingConfigs } from "../configs/testingConfigs";
 import { strings } from "../contants/strings";
 import { AIDenoiserExtension, IAIDenoiserProcessor } from "agora-extension-ai-denoiser";
+import { convertProtobufToTextStream } from "../protobuf/convert";
 
 export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () => void, updateUserList: (userId: string, add: boolean) => void) => {
     const [videoSetupState, setVideoSetupState] = useState<SetupState>('loading');
@@ -170,6 +171,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
     };
 
     const handleDisconnectClick = () => {
+        userDataStore.userLeft(String(config?.uid), config.channelName)
         setVideoStatus(false);
         setAudioStatus(false);
         // voice2voiceTranslator.stopTranslationService()
@@ -199,6 +201,8 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 })
                 setIsRecording(false)
             }
+            userDataStore.userLeft(String(user?.uid), config.channelName)
+            // make a api call to backend for user left
             removeUserFromMap(Number(user?.uid));
         },
         onUserPublished: async (user: IAgoraRTCRemoteUser, mediaType: IMediaType, channelConfig?: IDataChannelConfig | undefined) => {
@@ -278,7 +282,27 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             });
         },
         onStreamMessage: (uid, payload) => {
-            // convert Uint8Array to string
+            const botData = getBotData(String(uid))
+            if (botData.targetLang === botData.srcLang && String(botData.speakerUID) === String(config.uid)) {
+                try {
+                    const agoraStttranscription = convertProtobufToTextStream(payload)
+                    agoraStttranscription.words.forEach((word) => {
+                        if (word.isFinal) {
+                            completeTranscript.current.push({
+                                uid: String(botData.speakerUID),
+                                text: word.text,
+                                timestamp: new Date(),
+                                spokenWords: true
+                            })
+                            onTranslationRecived(botData.speakerUID, word.text)
+                        }
+                    })
+                } catch (error) {
+                    console.log('filterlog', error)
+                }
+                return
+            }
+
             try {
                 const decoder = new TextDecoder();
                 const str = decoder.decode(payload);
@@ -300,7 +324,6 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                     chatMessageStr = atob(data[3]);
                 }
                 const chatMessage = JSON.parse(chatMessageStr);
-                const botData = getBotData(String(uid))
                 if (chatMessage.type === 'session.updated') {
                     // according to uid and languages it is decided if bot is ready. 
                     // console.log('chatMessage', chatMessage)

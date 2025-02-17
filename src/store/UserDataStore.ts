@@ -58,6 +58,20 @@ class UserDataStore {
         }
     }
 
+    userLeft = async (uid: String, channelName: String) => {
+        try {
+            const response = await axios.post(`${ENPOINTS.BASE_URL}/user_left`, {
+                user_id: uid,
+                channel_name: channelName
+            })
+        }
+
+        catch (e) {
+            console.log("Error in user left api")
+        }
+    }
+
+
     getUserName = (uid: String): String => {
         return this.uidMap[`${uid}`]
     }

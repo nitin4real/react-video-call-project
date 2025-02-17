@@ -6,6 +6,7 @@ class AgoraTokenHelper {
     isOccupied: boolean = false
     GenerateTokenForUserID = async (
         userId: string, channelName: string = '', language: string = '', isRecorder: boolean = false,
+        voiceId: string = 'ash',
         onComplete: (status: SetupState, response: ITokenResponse) => void
     ) => {
         if (this.isOccupied) return
@@ -16,7 +17,8 @@ class AgoraTokenHelper {
                     userId,
                     channelName,
                     language,
-                    isRecorder
+                    isRecorder,
+                    voiceId
                 },
             })
             onComplete('success', response.data)

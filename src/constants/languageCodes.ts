@@ -67,3 +67,7 @@ export const getLanguageNameByISOCode = (isoCode: string): string => {
     return languageList.find(language => language.isoCode === isoCode)?.languageName ?? 'Unknown Lang.'
 }
 
+export const voiceList = [
+    { voiceName: 'Male', code: 'ash', gender: 'male' },
+    { voiceName: 'Femlae', code: 'sage', gender: 'female' },
+]

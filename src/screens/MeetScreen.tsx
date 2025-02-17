@@ -19,6 +19,7 @@ const useMeet = () => {
     const language = pathValues[pathValues.length - 1]
     const channelName = pathValues[pathValues.length - 2]
     let username: string = String(localStorage.getItem('username'))
+    let voiceId: string = String(localStorage.getItem('voiceId')) || 'ash'
     const isRecorder = location.search.split('=')[1] === 'recorder'
     const [userIdList, setUserIdList] = useState<string[]>([])
     const disconnectAllConnections = () => {
@@ -87,7 +88,7 @@ const useMeet = () => {
         if (tokensRetrivedStatus === 'loading') {
             try {
                 console.log('getting the new tokens')
-                tokenGenerator.GenerateTokenForUserID(username, channelName, language, isRecorder, onComplete)
+                tokenGenerator.GenerateTokenForUserID(username, channelName, language, isRecorder, voiceId, onComplete)
             } catch (e) {
                 console.log("Error in generating tokens")
             }
