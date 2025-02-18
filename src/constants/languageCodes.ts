@@ -69,5 +69,5 @@ export const getLanguageNameByISOCode = (isoCode: string): string => {
 
 export const voiceList = [
     { voiceName: 'Male', code: 'ash', gender: 'male' },
-    { voiceName: 'Femlae', code: 'sage', gender: 'female' },
+    { voiceName: 'Female', code: 'sage', gender: 'female' },
 ]
