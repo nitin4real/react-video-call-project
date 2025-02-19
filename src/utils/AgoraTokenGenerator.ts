@@ -5,7 +5,7 @@ import { ITokenResponse, SetupState } from "../interface/interfaces";
 class AgoraTokenHelper {
     isOccupied: boolean = false
     GenerateTokenForUserID = async (
-        userId: string, channelName: string = '', language: string = '', isRecorder: boolean = false,
+        userId: string, channelName: string = '', language: string = '', secondaryLanguage: string = '', isRecorder: boolean = false,
         voiceId: string = 'ash',
         onComplete: (status: SetupState, response: ITokenResponse) => void
     ) => {
@@ -18,7 +18,8 @@ class AgoraTokenHelper {
                     channelName,
                     language,
                     isRecorder,
-                    voiceId
+                    voiceId,
+                    secondaryLanguage
                 },
             })
             onComplete('success', response.data)

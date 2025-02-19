@@ -6,10 +6,42 @@ import TestingMenuBox from "../configs/testingMenuBox";
 import { CURRENT_VERSION } from "../configs/versions";
 import agoraLogo from '../images/agoraLogo.png';
 
+const MultiLanguageSelect = ({ selectedLanguage, setSelectedLanguage }: { selectedLanguage: string, setSelectedLanguage: (lang: string) => void }) => {
+  const [addSecondLanguage, setAddSecondLanguage] = useState<boolean>(false);
+  const [secondaryLanguage, setSecondaryLanguage] = useState<string>('');
+
+  <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="" /></svg>
+  return <div style={{ flexDirection: 'row', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+    <LanguageDropdown selectedLanguage={selectedLanguage} setSelectedLanguage={setSelectedLanguage} />
+    {addSecondLanguage ? <LanguageDropdown displayText="Select Secondary Language"
+      selectedLanguage={secondaryLanguage}
+      setSelectedLanguage={(lang) => {
+        localStorage.setItem('secondaryLanguage', lang)
+        setSecondaryLanguage(lang)
+      }} /> : <></>}
+    <svg
+      onClick={() => {
+        if (addSecondLanguage) {
+          localStorage.removeItem('secondaryLanguage')
+          setSecondaryLanguage('')
+        }
+        setAddSecondLanguage(!addSecondLanguage)
+      }}
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      xmlns="http://www.w3.org/2000/svg">
+      <path fill="#ccc" d={
+        !addSecondLanguage ?
+          "M16 3C8.832 3 3 8.832 3 16s5.832 13 13 13s13-5.832 13-13S23.168 3 16 3m0 2c6.087 0 11 4.913 11 11s-4.913 11-11 11S5 22.087 5 16S9.913 5 16 5m-1 5v5h-5v2h5v5h2v-5h5v-2h-5v-5z"
+          : "M16 3C8.832 3 3 8.832 3 16s5.832 13 13 13s13-5.832 13-13S23.168 3 16 3m0 2c6.087 0 11 4.913 11 11s-4.913 11-11 11S5 22.087 5 16S9.913 5 16 5m-6 10v2h12v-2z"
+      } />
+    </svg>
+  </div>
+}
 
 
-
-const LanguageDropdown = ({ selectedLanguage, setSelectedLanguage }: { selectedLanguage: string, setSelectedLanguage: (lang: string) => void }) => {
+const LanguageDropdown = ({ selectedLanguage, displayText, setSelectedLanguage, }: { selectedLanguage: string, displayText?: string, setSelectedLanguage: (lang: string) => void }) => {
 
   const languages = languageList.map(language => ({
     value: language.code,
@@ -27,8 +59,9 @@ const LanguageDropdown = ({ selectedLanguage, setSelectedLanguage }: { selectedL
         control: (styles) => ({
           ...styles,
           backgroundColor: 'white',
-          width: window.innerWidth <= 1100 ? 'auto' : '30%',
-          borderRadius: '10px'
+          borderRadius: '10px',
+          marginRight: '10px',
+          // width: window.innerWidth <= 1100 ? '100%' : '30%',
         }),
         option: (styles, { isFocused, isSelected }) => {
           return {
@@ -39,7 +72,7 @@ const LanguageDropdown = ({ selectedLanguage, setSelectedLanguage }: { selectedL
         },
         menu: (styles) => ({
           ...styles,
-          width: window.innerWidth <= 1100 ? '100%' : '30%',
+          // width: window.innerWidth <= 1100 ? '100%' : '30%',
           borderRadius: '10px',
           marginTop: '2px'
         })
@@ -48,7 +81,7 @@ const LanguageDropdown = ({ selectedLanguage, setSelectedLanguage }: { selectedL
       onChange={handleChange}
       options={languages}
       isSearchable
-      placeholder="Select Your Language"
+      placeholder={displayText || "Select Your Language"}
     />
   );
 }
@@ -175,7 +208,7 @@ export const JoinMeetComponent = () => {
         <div className="login-input-container">
           <h2 className="demo-header">Real Time Speech to Speech Translation Demo </h2>
           {isTestingMode ? <TestingMenuBox /> : <></>}
-          <LanguageDropdown
+          <MultiLanguageSelect
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage} />
           <br />

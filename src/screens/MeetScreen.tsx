@@ -20,6 +20,7 @@ const useMeet = () => {
     const channelName = pathValues[pathValues.length - 2]
     let username: string = String(localStorage.getItem('username'))
     let voiceId: string = String(localStorage.getItem('voiceId')) || 'ash'
+    const secondaryLanguage: string = String(localStorage.getItem('secondaryLanguage'))
     const isRecorder = location.search.split('=')[1] === 'recorder'
     const [userIdList, setUserIdList] = useState<string[]>([])
     const disconnectAllConnections = () => {
@@ -88,7 +89,7 @@ const useMeet = () => {
         if (tokensRetrivedStatus === 'loading') {
             try {
                 console.log('getting the new tokens')
-                tokenGenerator.GenerateTokenForUserID(username, channelName, language, isRecorder, voiceId, onComplete)
+                tokenGenerator.GenerateTokenForUserID(username, channelName, language, secondaryLanguage, isRecorder, voiceId, onComplete)
             } catch (e) {
                 console.log("Error in generating tokens")
             }
@@ -129,7 +130,7 @@ export const MeetScreen = () => {
         return <Loader />
     } else if (tokensRetrivedStatus === 'error') {
         return <ErrorComponent message="Error in joining meet. Please try again" />
-    }  
+    }
 
     return <div className="full-screen-container">
         <div className="video-pane">
