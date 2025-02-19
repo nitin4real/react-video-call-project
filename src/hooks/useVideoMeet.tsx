@@ -354,9 +354,9 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                     })
                 }
                 // console.log('type', chatMessage.type, (isSelfRecorder || botData.speakerUID === config.uid) && chatMessage.type === 'response.text.done')
-                if ((isSelfRecorder || botData.targetLangName === config.language) && chatMessage.type === 'response.text.done') {
+                if (((isSelfRecorder && false) || botData.targetLangName === config.language) && chatMessage.type === 'response.text.done') {
                     onTranslationRecived(botData.speakerUID, chatMessage.text)
-                } else if ((isSelfRecorder || botData.targetLangName === config.language) && (chatMessage.type === 'response.audio_transcript.done')) {
+                } else if (((isSelfRecorder && false) || botData.targetLangName === config.language) && (chatMessage.type === 'response.audio_transcript.done')) {
                     onTranslationRecived(botData.speakerUID, chatMessage.transcript)
                 }
             } catch (error) {
