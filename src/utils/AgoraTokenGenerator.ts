@@ -7,6 +7,7 @@ class AgoraTokenHelper {
     GenerateTokenForUserID = async (
         userId: string, channelName: string = '', language: string = '', secondaryLanguage: string = '', isRecorder: boolean = false,
         voiceId: string = 'ash',
+        llmId: string = '',
         onComplete: (status: SetupState, response: ITokenResponse) => void
     ) => {
         if (this.isOccupied) return
@@ -19,6 +20,7 @@ class AgoraTokenHelper {
                     language,
                     isRecorder,
                     voiceId,
+                    llmId,
                     secondaryLanguage
                 },
             })

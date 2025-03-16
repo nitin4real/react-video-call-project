@@ -71,3 +71,8 @@ export const voiceList = [
     { voiceName: 'Male', code: 'ash', gender: 'male' },
     { voiceName: 'Female', code: 'sage', gender: 'female' },
 ]
+
+export const llmList = [
+    { llmName: 'OpenAI', code: 'openai', },
+    { llmName: 'Google Gemini', code: 'gemini', },
+]

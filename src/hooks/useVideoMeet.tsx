@@ -359,6 +359,14 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 } else if (((isSelfRecorder) || botData.targetLangName === config.language) && (chatMessage.type === 'response.audio_transcript.done')) {
                     onTranslationRecived(botData.speakerUID, chatMessage.transcript)
                 }
+
+                if(chatMessage?.data_type === 'transcribe'){
+                    if(chatMessage?.is_final){
+                        if(botData.targetLangName === config.language){
+                            onTranslationRecived(botData.speakerUID, chatMessage?.text)
+                        }
+                    }
+                }
             } catch (error) {
                 console.error('Error processing stream message:', error);
             }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from 'react-router-dom';
-import { languageList, voiceList } from "../constants/languageCodes";
+import { languageList, llmList, voiceList } from "../constants/languageCodes";
 import Select from 'react-select';
 import TestingMenuBox from "../configs/testingMenuBox";
 import { CURRENT_VERSION } from "../configs/versions";
@@ -10,7 +10,6 @@ const MultiLanguageSelect = ({ selectedLanguage, setSelectedLanguage }: { select
   const [addSecondLanguage, setAddSecondLanguage] = useState<boolean>(false);
   const [secondaryLanguage, setSecondaryLanguage] = useState<string>('');
 
-  <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="" /></svg>
   return <div style={{ flexDirection: 'row', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
     <LanguageDropdown selectedLanguage={selectedLanguage} setSelectedLanguage={setSelectedLanguage} />
     {addSecondLanguage ? <LanguageDropdown displayText="Select Secondary Language"
@@ -130,6 +129,52 @@ const VoiceDropdown = ({ selectedVoice, setSelectedVoice }: { selectedVoice: str
   );
 }
 
+const LLMSelectDropdown = ({ selectedLLM, setSelectedLLM }: {  selectedLLM: string,  setSelectedLLM: (lang: string) => void }) => {
+
+  const llms = llmList.map(llm => ({
+    value: llm.code,
+    label: llm.llmName
+  }));
+
+  const handleChange = (selectedOption: any) => {
+    setSelectedLLM(selectedOption?.value);
+  }
+
+  return (
+    <Select
+      id="llm-select"
+      styles={{
+        control: (styles) => ({
+          ...styles,
+          backgroundColor: 'white',
+          width: window.innerWidth <= 1100 ? 'auto' : '30%',
+          borderRadius: '10px',
+          marginTop: '15px'
+        }),
+        option: (styles, { isFocused, isSelected }) => {
+          return {
+            ...styles,
+            backgroundColor: isSelected ? '#1a73e8' : isFocused ? '#f1f1f1' : 'white',
+            color: isSelected ? 'white' : isFocused ? 'black' : 'black',
+          };
+        },
+        menu: (styles) => ({
+          ...styles,
+          width: window.innerWidth <= 1100 ? '100%' : '30%',
+          borderRadius: '10px',
+          marginTop: '2px'
+        })
+      }}
+      value={llms.find(llm => llm.value === selectedLLM)}
+      onChange={handleChange}
+      options={llms}
+      isSearchable
+      placeholder="Select Your Translator"
+    />
+  );
+}
+
+
 const VoiceAvatar = ({
   isSelected,
   imgSrc,
@@ -171,6 +216,7 @@ export const JoinMeetComponent = () => {
   const [selectedAvatarIndex, setSelectedAvatar] = useState<number>(-1);
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [selectedVoice, setSelectedVoice] = useState('');
+  const [selectedLLM, setSelectedLLM] = useState('');
   const [isTestingMode, setIsTestingMode] = useState(false);
 
   const toggleTestingMode = () => {
@@ -194,6 +240,7 @@ export const JoinMeetComponent = () => {
   const setSessionData = () => {
     localStorage.setItem('username', username)
     localStorage.setItem('voiceId', selectedVoice)
+    localStorage.setItem('llm', selectedLLM)
     // if (selectedAvatarIndex === -1) {
     //   localStorage.setItem('useravatar', avatars[selectedAvatarIndex])
     // } else {
@@ -215,6 +262,10 @@ export const JoinMeetComponent = () => {
           <VoiceDropdown
             selectedVoice={selectedVoice}
             setSelectedVoice={setSelectedVoice} />
+          <LLMSelectDropdown
+            selectedLLM={selectedLLM}
+            setSelectedLLM={setSelectedLLM} />
+
           {/* <ToggleGender
             isMaleSelected={isMaleSelected}
             setIsMaleSelected={setIsMaleSelected}
