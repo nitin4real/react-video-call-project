@@ -7,6 +7,14 @@
   border-left: 1px solid #ccc;
 }
 
+body {
+  font-family: 
+    'Noto Sans Devanagari',
+    'Noto Sans Tamil',
+    'Noto Sans Malayalam',
+    sans-serif;
+}
+
 .transcription-container {
   display: flex;
   flex-direction: column;
@@ -341,7 +349,6 @@ video {
 
 .dropdown-container {
   margin: 20px;
-  font-family: Arial, sans-serif;
 }
 
 label {
@@ -369,7 +376,6 @@ option:hover {
 .transcript-subtitle {
   width: 80%;
   overflow: auto;
-  font-family: Arial, sans-serif;
   font-size: 16px;
   color: white;
   background-color: rgba(0, 0, 0, 0.3);
@@ -387,7 +393,6 @@ option:hover {
 .transcript-message {
   font-size: medium;
   padding: 3px;
-  font-family: 'Arial', sans-serif;
 }
 
 .transcript-message-user {
@@ -513,7 +518,6 @@ input {
 }
 
 body {
-  font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
   background-color: #f9f9f9;
