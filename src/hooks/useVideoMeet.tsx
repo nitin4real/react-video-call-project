@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ENPOINTS } from "../constants/apiEndpoints";
 import { videoController } from "../controllers/videoController";
-import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState, ITranscript, AudioSuppresstionTimer, TranslationConfigs, IPopupItem } from "../interface/interfaces";
+import { IMediaType, IUidPlayerMapItem, IVideoConnectionConfig, IVideoMeetListeners, SetupState, ITranscriptMsg, AudioSuppresstionTimer, TranslationConfigs, IPopupItem, ITranscript } from "../interface/interfaces";
 import { userDataStore } from "../store/UserDataStore";
 import { getBotData } from "../utils/botCode";
 import { testingConfigs } from "../configs/testingConfigs";
@@ -181,6 +181,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
 
     const listenersRef = useRef<IVideoMeetListeners>({
         onUserJoined: (user: IAgoraRTCRemoteUser): void => {
+            console.log('onUserJoined', user)
             if (String(user?.uid) === strings.recorderID) {
                 addPopup({
                     id: -1,
@@ -206,15 +207,18 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             removeUserFromMap(Number(user?.uid));
         },
         onUserPublished: async (user: IAgoraRTCRemoteUser, mediaType: IMediaType, channelConfig?: IDataChannelConfig | undefined) => {
+            console.log('onUserPublished', user, mediaType, channelConfig)
             if (String(user?.uid) === strings.recorderID) {
                 return
             }
             if (!isSelfRecorder && String(user?.uid).length > 4) {
                 const botData = getBotData(String(user?.uid))
                 if (botData.targetLangName !== config.language || botData.speakerUID === config.uid || botData.srcLangName === config.language) {
+                    console.log('returning because of botData', botData.targetLangName !== config.language, botData.speakerUID === config.uid, botData.srcLangName === config.language)
                     return
                 }
             }
+            console.log('subscribing to user', user, mediaType)
             await videoController.subscribeToRemoteUser(user, mediaType);
             // MARK: Only subscribe to users ignore the bots with 8 digit uid
             if (mediaType === 'video' && String(user?.uid).length === 4) {
@@ -222,6 +226,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
             } else if (mediaType === 'audio') {
                 // do not play audio for all the bots only those who speak your language
                 if (user?.uid == config.uid || String(user?.uid) === strings.recorderID) {
+                    console.log('returning because of user', user?.uid == config.uid, String(user?.uid) === strings.recorderID)
                     return
                 }
                 if (String(user?.uid).length == 4) {
@@ -283,26 +288,6 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         },
         onStreamMessage: (uid, payload) => {
             const botData = getBotData(String(uid))
-            if (botData.targetLang === botData.srcLang && String(botData.speakerUID) === String(config.uid)) {
-                try {
-                    const agoraStttranscription = convertProtobufToTextStream(payload)
-                    agoraStttranscription.words.forEach((word) => {
-                        if (word.isFinal) {
-                            completeTranscript.current.push({
-                                uid: String(botData.speakerUID),
-                                text: word.text,
-                                timestamp: new Date(),
-                                spokenWords: true
-                            })
-                            onTranslationRecived(botData.speakerUID, word.text)
-                        }
-                    })
-                } catch (error) {
-                    console.log('filterlog', error)
-                }
-                return
-            }
-
             try {
                 const decoder = new TextDecoder();
                 const str = decoder.decode(payload);
@@ -324,49 +309,58 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                     chatMessageStr = atob(data[3]);
                 }
                 const chatMessage = JSON.parse(chatMessageStr);
-                if (chatMessage.type === 'session.updated') {
-                    // according to uid and languages it is decided if bot is ready. 
-                    // console.log('chatMessage', chatMessage)
-                    if (botData.targetLang === botData.srcLang && String(botData.speakerUID) === String(config.uid)) {
-                        addPopup({
-                            id: -1,
-                            title: 'Translation',
-                            description: 'Your transcription are live now.'
-                        })
-                        // console.log('Your transcription is live now')
-                    } else if (botData.targetLangName === config.language) {
-                        const userName = userDataStore.getUserName(botData.speakerUID)
-                        addPopup({
-                            id: -1,
-                            title: 'Translation',
-                            description: `${userName} Translation and transcriptions are live now.`
-                        })
-                        // console.log('Your Translation and transcriptions is live now', userDataStore.getUserName(botData.speakerUID))
-                    }
-                }
+                // if (chatMessage.type === 'session.updated') {
+                //     // according to uid and languages it is decided if bot is ready. 
+                //     // console.log('chatMessage', chatMessage)
+                //     if (botData.targetLang === botData.srcLang && String(botData.speakerUID) === String(config.uid)) {
+                //         addPopup({
+                //             id: -1,
+                //             title: 'Translation',
+                //             description: 'Your transcription are live now.'
+                //         })
+                //         // console.log('Your transcription is live now')
+                //     } else if (botData.targetLangName === config.language) {
+                //         const userName = userDataStore.getUserName(botData.speakerUID)
+                //         addPopup({
+                //             id: -1,
+                //             title: 'Translation',
+                //             description: `${userName} Translation and transcriptions are live now.`
+                //         })
+                //         // console.log('Your Translation and transcriptions is live now', userDataStore.getUserName(botData.speakerUID))
+                //     }
+                // }
+                // console.log('chatMessage', chatMessage)
                 //  2 cases "response.audio_transcript.done" "conversation.item.input_audio_transcription.completed" 
-                if (chatMessage.type === 'response.audio_transcript.done' || chatMessage.type === 'response.text.done') {
-                    completeTranscript.current.push({
-                        uid: String(botData.speakerUID),
-                        text: chatMessage.type === 'response.text.done' ? chatMessage.text : chatMessage.transcript,
-                        timestamp: new Date(),
-                        spokenWords: chatMessage.type === 'response.text.done'
-                    })
-                }
+                // this is for the download transcript : p2
+                // if (chatMessage.type === 'response.audio_transcript.done' || chatMessage.type === 'response.text.done') {
+                //     completeTranscript.current.push({
+                //         uid: String(botData.speakerUID),
+                //         text: chatMessage.type === 'response.text.done' ? chatMessage.text : chatMessage.transcript,
+                //         timestamp: new Date(),
+                //         spokenWords: chatMessage.type === 'response.text.done'
+                //     })
+                // }
                 // console.log('type', chatMessage.type, (isSelfRecorder || botData.speakerUID === config.uid) && chatMessage.type === 'response.text.done')
-                if (((isSelfRecorder) || botData.targetLangName === config.language) && chatMessage.type === 'response.text.done') {
-                    onTranslationRecived(botData.speakerUID, chatMessage.text)
-                } else if (((isSelfRecorder) || botData.targetLangName === config.language) && (chatMessage.type === 'response.audio_transcript.done')) {
-                    onTranslationRecived(botData.speakerUID, chatMessage.transcript)
-                }
 
-                if(chatMessage?.data_type === 'transcribe'){
-                    if(chatMessage?.is_final){
-                        if(botData.targetLangName === config.language){
-                            onTranslationRecived(botData.speakerUID, chatMessage?.text)
-                        }
-                    }
+
+                // if (((isSelfRecorder) || botData.targetLangName === config.language) && chatMessage.object === 'assistant.transcription') {
+                //     onTranslationRecived(botData.speakerUID, chatMessage.text)
+                // } else if (((isSelfRecorder) || botData.targetLangName === config.language) && (chatMessage.object === 'assistant.transcription')) {
+                //     onTranslationRecived(botData.speakerUID, chatMessage.transcript)
+                // }
+
+                if (chatMessage.object === 'assistant.transcription' && botData.targetLangName === config.language) {
+                    onTranslationRecived(botData.speakerUID, chatMessage.text, { botId: String(uid), turnId: chatMessage.turn_id })
+                } else if (chatMessage.object === 'user.transcription' && botData.speakerUID === config.uid && botData.srcLangName === config.language) {
+                    onTranslationRecived(botData.speakerUID, chatMessage.text, { botId: String(uid), turnId: chatMessage.turn_id })
                 }
+                // if(chatMessage?.data_type === 'transcribe'){
+                //     if(chatMessage?.is_final){
+                //         if(botData.targetLangName === config.language){
+                //             onTranslationRecived(botData.speakerUID, chatMessage?.text)
+                //         }
+                //     }
+                // }
             } catch (error) {
                 console.error('Error processing stream message:', error);
             }
@@ -378,23 +372,41 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         setVideoSetupState(status);
     };
 
-    const onTranslationRecived = (uid: string, transcriptText: string) => {
+    const onTranslationRecived = (uid: string, transcriptText: string, metaData: { botId: string, turnId: number }) => {
         setUidPlayerMap((uidPlayerMap) => {
             const speakerNodeIndex = uidPlayerMap.findIndex((user) => {
                 return String(user.uid) === String(uid)
             })
             if (speakerNodeIndex !== -1 && transcriptText?.trim()) {
                 setTranscript((transcript) => {
-                    return [
-                        ...transcript,
-                        {
-                            uid: String(uid),
-                            text: transcriptText,
-                            timestamp: new Date()
-                        }
-                    ]
+                    // find last botspeach
+                    const continueTranscript = transcript.find((item: ITranscript) => {
+                        return item.metaData?.botId === metaData.botId && item.metaData?.turnId === metaData.turnId
+                    })
+                    if(continueTranscript){
+                        return transcript.map((item) => {
+                            if(item.metaData?.botId === metaData.botId && item.metaData?.turnId === metaData.turnId){
+                                return {
+                                    ...item,
+                                    text: transcriptText
+                                }
+                            }
+                            return item
+                        })
+                    } else {
+                        return [
+                            ...transcript,
+                            {
+                                uid: String(uid),
+                                text: transcriptText,
+                                timestamp: new Date(),
+                                metaData: metaData
+                            }
+                        ]
+                    }
                 })
-                uidPlayerMap[speakerNodeIndex].transcript.push(transcriptText)
+
+                // uidPlayerMap[speakerNodeIndex].transcript.push(transcriptText)
                 return [...uidPlayerMap]
             }
             return uidPlayerMap

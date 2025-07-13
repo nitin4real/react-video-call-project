@@ -9,8 +9,8 @@ export const MeetHeader = () => {
         <a target='_blank' href='https://www.agora.io/en/'>
             <img src={agoraLogo} alt="Agora" className="header-agora-logo" />
         </a>
-        <a target='_blank' href='https://www.agora.io/en/products/agora-openai-conversational-ai-sdk/'>
+        {/* <a target='_blank' href='https://www.agora.io/en/products/agora-openai-conversational-ai-sdk/'>
         <img src={oai} alt="Agora" className="header-oai-logo" />
-        </a>
+        </a> */}
     </div>;
 };

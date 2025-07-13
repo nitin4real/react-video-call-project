@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from 'react-router-dom';
-import { languageList, llmList, voiceList } from "../constants/languageCodes";
+import { languageList, voiceList } from "../constants/languageCodes";
 import Select from 'react-select';
 import TestingMenuBox from "../configs/testingMenuBox";
 import { CURRENT_VERSION } from "../configs/versions";
@@ -12,7 +12,7 @@ const MultiLanguageSelect = ({ selectedLanguage, setSelectedLanguage }: { select
 
   return <div style={{ flexDirection: 'row', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
     <LanguageDropdown selectedLanguage={selectedLanguage} setSelectedLanguage={setSelectedLanguage} />
-    {addSecondLanguage ? <LanguageDropdown displayText="Select Secondary Language"
+    {/* {addSecondLanguage ? <LanguageDropdown displayText="Select Secondary Language"
       selectedLanguage={secondaryLanguage}
       setSelectedLanguage={(lang) => {
         localStorage.setItem('secondaryLanguage', lang)
@@ -35,7 +35,7 @@ const MultiLanguageSelect = ({ selectedLanguage, setSelectedLanguage }: { select
           "M16 3C8.832 3 3 8.832 3 16s5.832 13 13 13s13-5.832 13-13S23.168 3 16 3m0 2c6.087 0 11 4.913 11 11s-4.913 11-11 11S5 22.087 5 16S9.913 5 16 5m-1 5v5h-5v2h5v5h2v-5h5v-2h-5v-5z"
           : "M16 3C8.832 3 3 8.832 3 16s5.832 13 13 13s13-5.832 13-13S23.168 3 16 3m0 2c6.087 0 11 4.913 11 11s-4.913 11-11 11S5 22.087 5 16S9.913 5 16 5m-6 10v2h12v-2z"
       } />
-    </svg>
+    </svg> */}
   </div>
 }
 
@@ -44,11 +44,11 @@ const LanguageDropdown = ({ selectedLanguage, displayText, setSelectedLanguage, 
 
   const languages = languageList.map(language => ({
     value: language.code,
-    label: language.languageName
+    label: language.name
   }));
 
   const handleChange = (selectedOption: any) => {
-    setSelectedLanguage(selectedOption?.value);
+    setSelectedLanguage(selectedOption?.label);
   }
 
   return (
@@ -129,52 +129,6 @@ const VoiceDropdown = ({ selectedVoice, setSelectedVoice }: { selectedVoice: str
   );
 }
 
-const LLMSelectDropdown = ({ selectedLLM, setSelectedLLM }: {  selectedLLM: string,  setSelectedLLM: (lang: string) => void }) => {
-
-  const llms = llmList.map(llm => ({
-    value: llm.code,
-    label: llm.llmName
-  }));
-
-  const handleChange = (selectedOption: any) => {
-    setSelectedLLM(selectedOption?.value);
-  }
-
-  return (
-    <Select
-      id="llm-select"
-      styles={{
-        control: (styles) => ({
-          ...styles,
-          backgroundColor: 'white',
-          width: window.innerWidth <= 1100 ? 'auto' : '30%',
-          borderRadius: '10px',
-          marginTop: '15px'
-        }),
-        option: (styles, { isFocused, isSelected }) => {
-          return {
-            ...styles,
-            backgroundColor: isSelected ? '#1a73e8' : isFocused ? '#f1f1f1' : 'white',
-            color: isSelected ? 'white' : isFocused ? 'black' : 'black',
-          };
-        },
-        menu: (styles) => ({
-          ...styles,
-          width: window.innerWidth <= 1100 ? '100%' : '30%',
-          borderRadius: '10px',
-          marginTop: '2px'
-        })
-      }}
-      value={llms.find(llm => llm.value === selectedLLM)}
-      onChange={handleChange}
-      options={llms}
-      isSearchable
-      placeholder="Select Your Translator"
-    />
-  );
-}
-
-
 const VoiceAvatar = ({
   isSelected,
   imgSrc,
@@ -240,7 +194,6 @@ export const JoinMeetComponent = () => {
   const setSessionData = () => {
     localStorage.setItem('username', username)
     localStorage.setItem('voiceId', selectedVoice)
-    localStorage.setItem('llm', selectedLLM)
     // if (selectedAvatarIndex === -1) {
     //   localStorage.setItem('useravatar', avatars[selectedAvatarIndex])
     // } else {
@@ -262,10 +215,6 @@ export const JoinMeetComponent = () => {
           <VoiceDropdown
             selectedVoice={selectedVoice}
             setSelectedVoice={setSelectedVoice} />
-          <LLMSelectDropdown
-            selectedLLM={selectedLLM}
-            setSelectedLLM={setSelectedLLM} />
-
           {/* <ToggleGender
             isMaleSelected={isMaleSelected}
             setIsMaleSelected={setIsMaleSelected}

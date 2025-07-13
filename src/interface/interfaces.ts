@@ -89,6 +89,10 @@ export type ITranscript = {
     text: string
     timestamp: Date
     spokenWords?: boolean
+    metaData?: {
+        botId: string
+        turnId: number
+    }
 }
 // import { voice2voiceTranslator } from "../services/voice2VoiceTranslationService";
 export type AudioSuppresstionTimer = {
@@ -123,3 +127,11 @@ export interface IChatListeners {
     onImageMessage: (msg: AgoraChat.ImgMsgBody) => void,
     onFileMessage: (msg: AgoraChat.FileMsgBody) => void
 }
+
+
+export interface ITranscriptMsg {
+    speaker: string;
+    transcription: string;
+    turn_id: number;
+  }
+  

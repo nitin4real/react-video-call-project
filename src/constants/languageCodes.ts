@@ -1,78 +1,76 @@
-export const languageList = [
-    { languageName: 'Afrikaans', code: 'Afrikaans', isoCode: 'af' },
-    { languageName: 'Arabic', code: 'Arabic', isoCode: 'ar' },
-    { languageName: 'Armenian', code: 'Armenian', isoCode: 'hy' },
-    { languageName: 'Azerbaijani', code: 'Azerbaijani', isoCode: 'az' },
-    { languageName: 'Belarusian', code: 'Belarusian', isoCode: 'be' },
-    { languageName: 'Bengali', code: 'Bengali', isoCode: 'bn' },
-    { languageName: 'Bosnian', code: 'Bosnian', isoCode: 'bs' },
-    { languageName: 'Bulgarian', code: 'Bulgarian', isoCode: 'bg' },
-    { languageName: 'Catalan', code: 'Catalan', isoCode: 'ca' },
-    { languageName: 'Chinese', code: 'Chinese', isoCode: 'zh' },
-    { languageName: 'Croatian', code: 'Croatian', isoCode: 'hr' },
-    { languageName: 'Czech', code: 'Czech', isoCode: 'cs' },
-    { languageName: 'Danish', code: 'Danish', isoCode: 'da' },
-    { languageName: 'Dutch', code: 'Dutch', isoCode: 'nl' },
-    { languageName: 'English', code: 'English', isoCode: 'en' },
-    { languageName: 'Estonian', code: 'Estonian', isoCode: 'et' },
-    { languageName: 'Finnish', code: 'Finnish', isoCode: 'fi' },
-    { languageName: 'French', code: 'French', isoCode: 'fr' },
-    { languageName: 'Galician', code: 'Galician', isoCode: 'gl' },
-    { languageName: 'German', code: 'German', isoCode: 'de' },
-    { languageName: 'Greek', code: 'Greek', isoCode: 'el' },
-    { languageName: 'Hebrew', code: 'Hebrew', isoCode: 'he' },
-    { languageName: 'Hindi', code: 'Hindi', isoCode: 'hi' },
-    { languageName: 'Hungarian', code: 'Hungarian', isoCode: 'hu' },
-    { languageName: 'Icelandic', code: 'Icelandic', isoCode: 'is' },
-    { languageName: 'Indonesian', code: 'Indonesian', isoCode: 'id' },
-    { languageName: 'Italian', code: 'Italian', isoCode: 'it' },
-    { languageName: 'Japanese', code: 'Japanese', isoCode: 'ja' },
-    { languageName: 'Kannada', code: 'Kannada', isoCode: 'kn' },
-    { languageName: 'Kazakh', code: 'Kazakh', isoCode: 'kk' },
-    { languageName: 'Korean', code: 'Korean', isoCode: 'ko' },
-    { languageName: 'Latvian', code: 'Latvian', isoCode: 'lv' },
-    { languageName: 'Lithuanian', code: 'Lithuanian', isoCode: 'lt' },
-    { languageName: 'Macedonian', code: 'Macedonian', isoCode: 'mk' },
-    { languageName: 'Malay', code: 'Malay', isoCode: 'ms' },
-    { languageName: 'Marathi', code: 'Marathi', isoCode: 'mr' },
-    { languageName: 'Maori', code: 'Maori', isoCode: 'mi' },
-    { languageName: 'Nepali', code: 'Nepali', isoCode: 'ne' },
-    { languageName: 'Norwegian', code: 'Norwegian', isoCode: 'no' },
-    { languageName: 'Persian', code: 'Persian', isoCode: 'fa' },
-    { languageName: 'Polish', code: 'Polish', isoCode: 'pl' },
-    { languageName: 'Portuguese', code: 'Portuguese', isoCode: 'pt' },
-    { languageName: 'Romanian', code: 'Romanian', isoCode: 'ro' },
-    { languageName: 'Russian', code: 'Russian', isoCode: 'ru' },
-    { languageName: 'Serbian', code: 'Serbian', isoCode: 'sr' },
-    { languageName: 'Slovak', code: 'Slovak', isoCode: 'sk' },
-    { languageName: 'Slovenian', code: 'Slovenian', isoCode: 'sl' },
-    { languageName: 'Spanish', code: 'Spanish', isoCode: 'es' },
-    { languageName: 'Swahili', code: 'Swahili', isoCode: 'sw' },
-    { languageName: 'Swedish', code: 'Swedish', isoCode: 'sv' },
-    { languageName: 'Tagalog', code: 'Tagalog', isoCode: 'tl' },
-    { languageName: 'Tamil', code: 'Tamil', isoCode: 'ta' },
-    { languageName: 'Thai', code: 'Thai', isoCode: 'th' },
-    { languageName: 'Turkish', code: 'Turkish', isoCode: 'tr' },
-    { languageName: 'Ukrainian', code: 'Ukrainian', isoCode: 'uk' },
-    { languageName: 'Urdu', code: 'Urdu', isoCode: 'ur' },
-    { languageName: 'Vietnamese', code: 'Vietnamese', isoCode: 'vi' },
-    { languageName: 'Welsh', code: 'Welsh', isoCode: 'cy' },
+
+interface languageCodeObj {
+    name: LanguageName;
+    code: string;
+    isoCode: string;
+}
+
+export enum LanguageName {
+    Arabic = 'Arabic',
+    Bengali = 'Bengali',
+    Chinese = 'Chinese',
+    Dutch = 'Dutch',
+    English = 'English',
+    EnglishIN = 'English-India',
+    French = 'French',
+    German = 'German',
+    Hebrew = 'Hebrew',
+    Hindi = 'Hindi',
+    Indonesian = 'Indonesian',
+    Italian = 'Italian',
+    Japanese = 'Japanese',
+    Kannada = 'Kannada',
+    Korean = 'Korean',
+    Malay = 'Malay',
+    Persian = 'Persian',
+    Portuguese = 'Portuguese',
+    Russian = 'Russian',
+    Spanish = 'Spanish',
+    Tagalog = 'Tagalog',
+    Tamil = 'Tamil',
+    Thai = 'Thai',
+    Turkish = 'Turkish',
+    Vietnamese = 'Vietnamese',
+    Welsh = 'Welsh'
+}
+
+export const languageList: languageCodeObj[] = [
+    { name: LanguageName.Arabic, code: '02', isoCode: 'ar-EG' },
+    { name: LanguageName.Bengali, code: '58', isoCode: 'bn-IN' },
+    { name: LanguageName.Chinese, code: '09', isoCode: 'zh-CN' },
+    { name: LanguageName.Dutch, code: '13', isoCode: 'nl-NL' },
+    { name: LanguageName.English, code: '14', isoCode: 'en-US' },
+    { name: LanguageName.EnglishIN, code: '15', isoCode: 'en-IN' },
+    { name: LanguageName.French, code: '17', isoCode: 'fr-FR' },
+    { name: LanguageName.German, code: '19', isoCode: 'de-DE' },
+    { name: LanguageName.Hebrew, code: '21', isoCode: 'he-IL' },
+    { name: LanguageName.Hindi, code: '22', isoCode: 'hi-IN' },
+    { name: LanguageName.Indonesian, code: '25', isoCode: 'id-ID' },
+    { name: LanguageName.Italian, code: '26', isoCode: 'it-IT' },
+    { name: LanguageName.Japanese, code: '27', isoCode: 'ja-JP' },
+    { name: LanguageName.Kannada, code: '28', isoCode: 'kn-IN' },
+    { name: LanguageName.Korean, code: '30', isoCode: 'ko-KR' },
+    { name: LanguageName.Malay, code: '34', isoCode: 'ms-MY' },
+    { name: LanguageName.Persian, code: '39', isoCode: 'fa-IR' },
+    { name: LanguageName.Portuguese, code: '41', isoCode: 'pt-PT' },
+    { name: LanguageName.Russian, code: '43', isoCode: 'ru-RU' },
+    { name: LanguageName.Spanish, code: '47', isoCode: 'es-ES' },
+    { name: LanguageName.Tagalog, code: '50', isoCode: 'fil-PH' },
+    { name: LanguageName.Tamil, code: '51', isoCode: 'ta-IN' },
+    { name: LanguageName.Thai, code: '52', isoCode: 'th-TH' },
+    { name: LanguageName.Turkish, code: '53', isoCode: 'tr-TR' },
+    { name: LanguageName.Vietnamese, code: '56', isoCode: 'vi-VN' },
 ]
 
 export const getLanguageISOCodeByName = (languageName: string): string | undefined => {
-    return languageList.find(language => language.languageName === languageName)?.isoCode
+    return languageList.find(language => language.name === languageName)?.isoCode
 }
 
 export const getLanguageNameByISOCode = (isoCode: string): string => {
-    return languageList.find(language => language.isoCode === isoCode)?.languageName ?? 'Unknown Lang.'
+    return languageList.find(language => language.isoCode === isoCode)?.name ?? 'Unknown Lang.'
 }
 
 export const voiceList = [
-    { voiceName: 'Male', code: 'ash', gender: 'male' },
-    { voiceName: 'Female', code: 'sage', gender: 'female' },
-]
-
-export const llmList = [
-    { llmName: 'OpenAI', code: 'openai', },
-    { llmName: 'Google Gemini', code: 'gemini', },
+    { voiceName: 'Male', code: 'EkK5I93UQWFDigLMpZcX', gender: 'male' },
+    { voiceName: 'Female', code: 'kL06KYMvPY56NluIQ72m', gender: 'female' },
 ]
