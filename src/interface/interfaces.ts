@@ -92,6 +92,7 @@ export type ITranscript = {
     metaData?: {
         botId: string
         turnId: number
+        object: string
     }
 }
 // import { voice2voiceTranslator } from "../services/voice2VoiceTranslationService";

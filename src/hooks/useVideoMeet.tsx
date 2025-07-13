@@ -350,9 +350,11 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 // }
 
                 if (chatMessage.object === 'assistant.transcription' && botData.targetLangName === config.language) {
-                    onTranslationRecived(botData.speakerUID, chatMessage.text, { botId: String(uid), turnId: chatMessage.turn_id })
+                    onTranslationRecived(botData.speakerUID, chatMessage.text, { botId: String(uid), turnId: chatMessage.turn_id, object: chatMessage.object })
                 } else if (chatMessage.object === 'user.transcription' && botData.speakerUID === config.uid && botData.srcLangName === config.language) {
-                    onTranslationRecived(botData.speakerUID, chatMessage.text, { botId: String(uid), turnId: chatMessage.turn_id })
+                    onTranslationRecived(botData.speakerUID, chatMessage.text, { botId: String(uid), turnId: chatMessage.turn_id, object: chatMessage.object })
+                } else if (isSelfRecorder && (chatMessage.object === 'assistant.transcription' || chatMessage.object === 'user.transcription')) {
+                    onTranslationRecived(botData.speakerUID, chatMessage.text, { botId: String(uid), turnId: chatMessage.turn_id, object: chatMessage.object })
                 }
                 // if(chatMessage?.data_type === 'transcribe'){
                 //     if(chatMessage?.is_final){
@@ -372,7 +374,7 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
         setVideoSetupState(status);
     };
 
-    const onTranslationRecived = (uid: string, transcriptText: string, metaData: { botId: string, turnId: number }) => {
+    const onTranslationRecived = (uid: string, transcriptText: string, metaData: { botId: string, turnId: number, object: string }) => {
         setUidPlayerMap((uidPlayerMap) => {
             const speakerNodeIndex = uidPlayerMap.findIndex((user) => {
                 return String(user.uid) === String(uid)
@@ -381,11 +383,11 @@ export const useVideoMeet = (config: IVideoConnectionConfig, onDisconnect: () =>
                 setTranscript((transcript) => {
                     // find last botspeach
                     const continueTranscript = transcript.find((item: ITranscript) => {
-                        return item.metaData?.botId === metaData.botId && item.metaData?.turnId === metaData.turnId
+                        return item.metaData?.botId === metaData.botId && item.metaData?.turnId === metaData.turnId && item.metaData?.object === metaData.object
                     })
                     if(continueTranscript){
                         return transcript.map((item) => {
-                            if(item.metaData?.botId === metaData.botId && item.metaData?.turnId === metaData.turnId){
+                            if(item.metaData?.botId === metaData.botId && item.metaData?.turnId === metaData.turnId && item.metaData?.object === metaData.object){
                                 return {
                                     ...item,
                                     text: transcriptText
